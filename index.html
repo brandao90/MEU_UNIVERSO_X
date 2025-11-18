@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+OCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -583,22 +583,4 @@ function animate() {
 function onCanvasClick(e) {
   if (!camera || !scene) return;
   const canvas = document.getElementById('canvas3d');
-  const rect = canvas.getBoundingClientRect();
-  const mouse = new THREE.Vector2(
-    ((e.clientX - rect.left) / rect.width) * 2 - 1,
-    -((e.clientY - rect.top) / rect.height) * 2 + 1
-  );
-  const raycaster = new THREE.Raycaster();
-  raycaster.setFromCamera(mouse, camera);
-  const spheres = noteMeshes.filter(m => m.geometry?.type === 'SphereGeometry');
-  const intersects = raycaster.intersectObjects(spheres);
-  if (intersects.length > 0) {
-    const noteId = intersects[0].object.userData.noteId;
-    document.getElementById('btnGrid').click();
-    setTimeout(() => openNote(noteId), 100);
-  }
-}
-</script>
-
-</body>
-</html>
+  const

@@ -1,586 +1,454 @@
-OCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meu Universo X</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Meu Universo X — Bloco de Notas</title>
+
+  <!-- Bibliotecas CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Inter:wght@400;600;800&display=swap');
-    
-    body { 
-      margin: 0; 
-      overflow-x: hidden;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-      font-family: 'Inter', sans-serif;
+    :root{
+      --accent:#8b5cf6;
+      --bg-1:#060713;
+      --bg-2:#0b1220;
     }
-    
-    .handwriting { font-family: 'Caveat', cursive; }
-    
-    .note-card { 
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      background: linear-gradient(145deg, #fff9e6 0%, #fef5d4 100%);
-      box-shadow: 
-        0 4px 6px rgba(0,0,0,0.1),
-        0 0 20px rgba(255,215,0,0.2),
-        inset 0 1px 0 rgba(255,255,255,0.5);
-      border: 2px solid rgba(139, 92, 246, 0.3);
+    html,body,#app{height:100%}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+      background: linear-gradient(180deg,var(--bg-1),var(--bg-2));
+      color:#e6eef8;
     }
-    
-    .note-card:hover { 
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 
-        0 20px 40px rgba(0,0,0,0.3),
-        0 0 40px rgba(139, 92, 246, 0.6),
-        0 0 60px rgba(236, 72, 153, 0.4),
-        inset 0 1px 0 rgba(255,255,255,0.8);
-    }
-    
-    .note-card::before {
-      content: '';
-      position: absolute;
-      top: -2px;
-      left: -2px;
-      right: -2px;
-      bottom: -2px;
-      background: linear-gradient(45deg, #8b5cf6, #ec4899, #06b6d4, #8b5cf6);
-      border-radius: inherit;
-      opacity: 0;
-      transition: opacity 0.3s;
-      z-index: -1;
-      filter: blur(10px);
-    }
-    
-    .note-card:hover::before {
-      opacity: 0.7;
-      animation: glow 2s ease-in-out infinite;
-    }
-    
-    @keyframes glow {
-      0%, 100% { filter: blur(10px) brightness(1); }
-      50% { filter: blur(15px) brightness(1.3); }
-    }
-    
-    @keyframes pulse { 
-      0%, 100% { opacity: 1; transform: scale(1); } 
-      50% { opacity: 0.8; transform: scale(1.05); } 
-    }
-    
-    .animate-pulse { 
-      animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; 
-    }
-    
-    .neon-text {
-      text-shadow: 
-        0 0 10px rgba(139, 92, 246, 0.8),
-        0 0 20px rgba(139, 92, 246, 0.6),
-        0 0 30px rgba(236, 72, 153, 0.4);
-    }
-    
-    .paper-texture {
-      background-image: 
-        repeating-linear-gradient(
-          0deg,
-          rgba(139, 92, 246, 0.03) 0px,
-          transparent 1px,
-          transparent 2px,
-          rgba(139, 92, 246, 0.03) 3px
-        ),
-        repeating-linear-gradient(
-          90deg,
-          rgba(236, 72, 153, 0.03) 0px,
-          transparent 1px,
-          transparent 2px,
-          rgba(236, 72, 153, 0.03) 3px
-        );
-    }
-    
-    .btn-neon {
-      position: relative;
-      background: linear-gradient(145deg, #8b5cf6, #ec4899);
-      box-shadow: 
-        0 4px 15px rgba(139, 92, 246, 0.4),
-        0 0 20px rgba(236, 72, 153, 0.3);
-      transition: all 0.3s;
-    }
-    
-    .btn-neon:hover {
-      box-shadow: 
-        0 6px 25px rgba(139, 92, 246, 0.6),
-        0 0 40px rgba(236, 72, 153, 0.5);
-      transform: translateY(-2px);
-    }
-    
-    .modal-paper {
-      background: linear-gradient(145deg, #fff9e6 0%, #fef5d4 100%);
-      box-shadow: 
-        0 20px 60px rgba(0,0,0,0.5),
-        0 0 40px rgba(139, 92, 246, 0.4),
-        inset 0 2px 4px rgba(255,255,255,0.6);
-    }
-    
-    .line-clamp-2 { 
-      display: -webkit-box; 
-      -webkit-line-clamp: 2; 
-      -webkit-box-orient: vertical; 
-      overflow: hidden; 
-    }
-    
-    .line-clamp-4 { 
-      display: -webkit-box; 
-      -webkit-line-clamp: 4; 
-      -webkit-box-orient: vertical; 
-      overflow: hidden; 
-    }
-    
-    input, textarea {
-      background: rgba(255, 249, 230, 0.9);
-      border: 2px solid rgba(139, 92, 246, 0.3);
-      color: #1a1a2e;
-      transition: all 0.3s;
-    }
-    
-    input:focus, textarea:focus {
-      outline: none;
-      border-color: #8b5cf6;
-      box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
-    }
-    
-    .tag-neon {
-      background: linear-gradient(135deg, #8b5cf6, #ec4899);
-      box-shadow: 0 0 10px rgba(139, 92, 246, 0.6);
-    }
+    .handwriting{font-family:"Caveat",cursive}
+    .note-card{transition:all .18s ease}
+    .postit{min-height:84px;border-radius:10px;padding:12px;box-shadow:0 8px 28px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.04)}
+    .neon{ text-shadow:0 0 8px rgba(139,92,246,0.9) }
+    #canvas3d{width:100%;height:100%;display:block}
+    .hidden{display:none}
+    .tag-pill{font-size:12px;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,0.04)}
+    .modal-bg{backdrop-filter: blur(6px)}
   </style>
 </head>
 <body>
-
-<!-- Splash Screen -->
-<div id="splash" class="fixed inset-0 flex items-center justify-center z-50" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">
-  <div class="text-center animate-pulse">
-    <img src="https://i.imgur.com/your-image.png" alt="Cientista" class="w-48 h-48 mx-auto mb-6 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'" style="filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.8));">
-    <div class="text-8xl mb-4" style="display:none; filter: drop-shadow(0 0 30px rgba(236, 72, 153, 0.8));">🐵</div>
-    <h1 class="text-6xl font-bold text-white mb-2 neon-text handwriting">Meu Universo X</h1>
-    <p class="text-2xl text-purple-300">Suas ideias conectadas ✨</p>
-  </div>
-</div>
-
-<!-- App -->
-<div id="app" style="display:none">
-  <!-- Header -->
-  <div class="bg-gradient-to-r from-purple-900/50 to-pink-900/50 backdrop-blur-md border-b-2 border-purple-500/30 p-6 paper-texture">
-    <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4">
-      <div class="flex items-center gap-4">
-        <img src="https://i.imgur.com/your-image.png" alt="Cientista" class="w-12 h-12 object-contain" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%220.9em%22 font-size=%2290%22>🐵</text></svg>'" style="filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.8));">
-        <h1 class="text-3xl font-bold text-white neon-text handwriting">Meu Universo X</h1>
-      </div>
-      
-      <div class="flex items-center gap-2 flex-1 max-w-md">
-        <div class="relative flex-1">
-          <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-400 text-xl">🔍</span>
-          <input id="searchInput" type="text" placeholder="Buscar notas mágicas..." class="w-full pl-12 pr-4 py-3 rounded-xl font-medium text-lg">
+  <div id="app" class="h-screen grid grid-rows-[auto_1fr]">
+    <!-- SPLASH -->
+    <div id="splash" class="fixed inset-0 z-50 flex items-center justify-center modal-bg" style="background:linear-gradient(180deg,rgba(2,6,23,0.95),rgba(5,9,20,0.98))">
+      <div class="text-center p-6">
+        <!-- usando a imagem enviada (caminho local solicitado) -->
+        <img id="splash-img" src='/mnt/data/A_composite_digital_screenshot_of_"Meu_Universo_X,.png' alt="Cientista" class="w-44 h-44 mx-auto mb-4" onerror="this.style.display='none';document.getElementById('splash-emoji').style.display='block'">
+        <div id="splash-emoji" style="display:none;font-size:72px;margin-bottom:8px">🐵</div>
+        <h1 class="handwriting text-4xl neon">Meu Universo X</h1>
+        <p class="mt-2 text-sm opacity-70">Obsidian + Google Keep — Markdown, grafos, post-its, offline.</p>
+        <div class="mt-6">
+          <button id="enter-btn" class="px-5 py-2 rounded-md" style="background:linear-gradient(90deg,var(--accent),#ec4899);color:white">Entrar</button>
         </div>
       </div>
-      
+    </div>
+
+    <!-- HEADER -->
+    <header class="flex items-center justify-between px-4 py-3 border-b border-white/5">
       <div class="flex items-center gap-3">
-        <button id="btnAdd" class="btn-neon p-3 rounded-xl text-white font-bold text-xl">➕ Nova</button>
-        <button id="btnGrid" class="btn-neon p-3 rounded-xl text-white text-xl">📊</button>
-        <button id="btnGraph" class="p-3 bg-purple-800/50 hover:bg-purple-700/70 rounded-xl text-white text-xl transition">🌐</button>
-        <button id="btnExport" class="p-3 bg-purple-800/50 hover:bg-purple-700/70 rounded-xl text-white text-xl transition">⬇️</button>
-        <label class="p-3 bg-purple-800/50 hover:bg-purple-700/70 rounded-xl text-white text-xl transition cursor-pointer">
-          ⬆️
-          <input type="file" id="importFile" accept=".json" class="hidden">
-        </label>
+        <img id="header-logo" src='/mnt/data/A_composite_digital_screenshot_of_"Meu_Universo_X,.png' alt="logo" class="w-10 h-10 rounded-md object-cover" onerror="this.style.display='none'">
+        <div>
+          <div class="text-lg font-semibold">Meu Universo X</div>
+          <div class="text-xs opacity-70">Cérebro 3D + Post-its</div>
+        </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Content -->
-  <div class="max-w-7xl mx-auto p-6">
-    <!-- Grid View -->
-    <div id="gridView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
-    
-    <!-- Graph View -->
-    <div id="graphView" style="display:none" class="relative">
-      <canvas id="canvas3d" class="w-full rounded-2xl shadow-2xl" style="height:600px; box-shadow: 0 0 60px rgba(139, 92, 246, 0.4);"></canvas>
-      <div class="absolute top-6 left-6 modal-paper p-6 rounded-2xl" style="border: 2px solid rgba(139, 92, 246, 0.5);">
-        <p class="text-lg font-bold text-purple-900 handwriting">🔮 Clique nas esferas mágicas!</p>
-        <p class="text-md text-purple-700">✨ Conexões = hashtags em comum</p>
+      <div class="flex items-center gap-3">
+        <input id="search" placeholder="Procurar (#tag ou texto)" class="bg-transparent border border-white/6 text-sm px-3 py-2 rounded-md w-72" />
+        <button id="toggle-view" class="px-3 py-2 rounded bg-white/5">Grid</button>
+        <button id="new-note" class="px-3 py-2 rounded bg-white/5">+ Nova</button>
+        <div class="flex gap-2">
+          <button id="export-all" class="px-2 py-2 rounded bg-white/5 text-sm">Export JSON</button>
+          <button id="import-all" class="px-2 py-2 rounded bg-white/5 text-sm">Import</button>
+        </div>
       </div>
-    </div>
-  </div>
-</div>
+    </header>
 
-<!-- Modal -->
-<div id="modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-40" style="display:none">
-  <div class="modal-paper rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" style="border: 3px solid rgba(139, 92, 246, 0.5);">
-    <div class="p-8">
-      <div class="flex justify-between items-start mb-6">
-        <div class="flex-1">
-          <div id="viewMode">
-            <h2 id="modalTitle" class="text-4xl font-bold mb-6 text-purple-900 handwriting"></h2>
-            <p id="modalContent" class="text-xl text-gray-800 whitespace-pre-wrap leading-relaxed"></p>
-            <div id="modalTags" class="mt-6 flex flex-wrap gap-3"></div>
-          </div>
-          <div id="editMode" style="display:none">
-            <input id="editTitle" type="text" class="w-full text-3xl font-bold rounded-xl px-4 py-3 mb-4 handwriting">
-            <div class="flex items-center gap-3 mb-4">
-              <button id="btnColorPicker" class="p-3 rounded-xl text-2xl btn-neon">🎨</button>
-              <div id="colorPicker" class="flex flex-wrap gap-2 p-3 rounded-xl" style="display:none; background: rgba(255, 249, 230, 0.9);"></div>
+    <!-- MAIN AREA -->
+    <main class="relative flex-1 grid grid-cols-1 lg:grid-cols-3">
+      <!-- CANVAS / GRAFO (esconde em mobile) -->
+      <section id="viz" class="lg:col-span-2 relative hidden lg:block">
+        <canvas id="canvas3d"></canvas>
+        <div style="position:absolute;left:12px;top:12px;color:rgba(255,255,255,0.85);font-size:13px">
+          <div>Grafo 3D — clique numa esfera para abrir nota • Drag para rotacionar</div>
+        </div>
+      </section>
+
+      <!-- GRID / LIST -->
+      <aside id="grid-area" class="p-4 overflow-auto">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="grid"></div>
+      </aside>
+
+      <!-- EDITOR MODAL -->
+      <div id="modal" class="fixed inset-0 z-40 hidden items-center justify-center modal-bg">
+        <div class="w-full max-w-4xl p-4 rounded-lg" style="background:linear-gradient(145deg,#fff9e6,#f8f0d6);color:#0b1220">
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <input id="note-title" placeholder="Título" class="w-full p-2 rounded mb-2 border" />
+              <div class="flex gap-2 mb-2">
+                <button id="md-toggle" class="px-2 py-1 rounded border">Markdown</button>
+                <button id="pin-btn" class="px-2 py-1 rounded border">Pin</button>
+                <input id="reminder" type="datetime-local" class="px-2 py-1 rounded border text-sm" />
+              </div>
+              <textarea id="note-body" rows="10" class="w-full p-3 rounded border" placeholder="Escreve em Markdown. Usa #tags e [[Wikilinks]]."></textarea>
             </div>
-            <textarea id="editContent" class="w-full h-80 rounded-xl px-4 py-3 resize-none text-lg" placeholder="Escreva sua nota aqui... Use #hashtags para conectar ideias! ✨"></textarea>
+            <div style="width:220px;">
+              <label class="block mb-1 text-sm">Cor (post-it)</label>
+              <div id="color-palette" class="grid grid-cols-4 gap-2 mb-4"></div>
+              <div class="flex gap-2">
+                <button id="save-note" class="px-3 py-2 rounded" style="background:linear-gradient(90deg,var(--accent),#ec4899);color:#fff">Salvar</button>
+                <button id="close-note" class="px-3 py-2 rounded border">Fechar</button>
+              </div>
+              <div class="mt-4 text-sm">
+                <button id="share-note" class="w-full px-3 py-2 rounded bg-white/5">Partilhar</button>
+                <button id="export-txt" class="w-full mt-2 px-3 py-2 rounded bg-white/5">Exportar .txt</button>
+                <button id="export-md" class="w-full mt-2 px-3 py-2 rounded bg-white/5">Exportar .md</button>
+              </div>
+            </div>
           </div>
         </div>
-        <button id="btnCloseModal" class="ml-4 p-3 hover:bg-purple-200/50 rounded-xl text-2xl transition">✖️</button>
       </div>
 
-      <div class="flex flex-wrap gap-3 mt-8 pt-6 border-t-2 border-purple-300">
-        <button id="btnEdit" class="px-6 py-3 btn-neon rounded-xl text-white font-bold text-lg">✏️ Editar</button>
-        <button id="btnSave" class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl text-white font-bold text-lg" style="display:none; box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);">💾 Salvar</button>
-        <button id="btnDelete" class="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl text-white font-bold text-lg" style="box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);">🗑️ Excluir</button>
-        <div class="flex gap-3 ml-auto flex-wrap">
-          <button onclick="shareNote('whatsapp')" class="px-4 py-3 bg-green-600 hover:bg-green-700 rounded-xl text-white font-medium transition">WhatsApp</button>
-          <button onclick="shareNote('telegram')" class="px-4 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl text-white font-medium transition">Telegram</button>
-          <button onclick="shareNote('email')" class="px-4 py-3 bg-purple-600 hover:bg-purple-700 rounded-xl text-white font-medium transition">Email</button>
-          <button onclick="exportNote('txt')" class="px-4 py-3 bg-gray-600 hover:bg-gray-700 rounded-xl text-white font-medium transition">TXT</button>
-          <button onclick="exportNote('md')" class="px-4 py-3 bg-gray-600 hover:bg-gray-700 rounded-xl text-white font-medium transition">MD</button>
-        </div>
-      </div>
-    </div>
+    </main>
   </div>
-</div>
 
-<script>
-// Estado da aplicação
-let notes = [];
-let currentNote = null;
-let scene, camera, renderer, noteMeshes = [];
-let animationFrame;
-const colors = ['#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#22c55e','#10b981','#14b8a6','#06b6d4','#0ea5e9','#3b82f6','#6366f1','#8b5cf6','#a855f7','#d946ef','#ec4899','#f43f5e','#64748b','#78716c','#a3a3a3'];
+  <script>
+  /* ============================
+     CONFIG E STATE
+     ============================*/
+  const STORAGE_KEY = 'meu_universo_x_v2';
+  const colors = [
+    '#fff9e6','#fff1cc','#ffe8b8','#ffd6a5','#ffd7b9',
+    '#ffd1dc','#ffe2f0','#f0e7ff','#e7f0ff','#dff7ff',
+    '#fef3c7','#fde68a','#fca5a5','#fbcfe8','#f8ccff',
+    '#e9d5ff','#c7d2fe','#bbf7d0','#bbf7fe','#fef08a'
+  ];
+  let notes = []; // {id,title,body,color,tags,links,createdAt,updatedAt,pinned,reminder}
+  let currentId = null;
+  let view='grid'; // grid or graph
 
-// Inicialização
-setTimeout(() => {
-  document.getElementById('splash').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  loadNotes();
-  renderGrid();
-}, 2500);
+  /* ============================
+     UTIL
+     ============================*/
+  function uid(){ return 'n_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7) }
+  function saveAll(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); rebuildGraph(); renderGrid(); }
+  function loadAll(){ try{ notes = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }catch(e){ notes=[] } }
+  function now(){ return Date.now() }
+  function extractTags(text){ const s=new Set(); (text||'').split(/\s+/).forEach(w=>{ if(w.startsWith('#') && w.length>1){ s.add(w.replace(/[^#\w-]/g,'').toLowerCase()) } }); return [...s] }
+  function extractWikilinks(text){ const s=new Set(); const re=/\[\[([^\]]+)\]\]/g; let m; while((m=re.exec(text))){ s.add(m[1].trim()) } return [...s] }
+  function escapeHtml(s){ if(!s) return ''; return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;') }
 
-function loadNotes() {
-  const stored = localStorage.getItem('meuUniversoX');
-  if (stored) notes = JSON.parse(stored);
-}
+  /* ============================
+     UI HOOKS
+     ============================*/
+  document.getElementById('enter-btn').addEventListener('click', ()=> document.getElementById('splash').style.display='none');
+  document.getElementById('new-note').addEventListener('click', ()=> openEditor(null));
+  document.getElementById('toggle-view').addEventListener('click', toggleView);
+  document.getElementById('search').addEventListener('input', ()=> highlightSearch(document.getElementById('search').value.trim().toLowerCase()));
 
-function saveNotes() {
-  localStorage.setItem('meuUniversoX', JSON.stringify(notes));
-}
+  // palette build
+  const palette = document.getElementById('color-palette');
+  colors.forEach(c=>{ const b=document.createElement('button'); b.className='w-full h-8 rounded'; b.style.background=c; b.onclick=()=>{ document.querySelectorAll('#color-palette button').forEach(x=>x.style.outline=''); b.style.outline='3px solid rgba(0,0,0,0.06)'; b.dataset.chosen='1' }; palette.appendChild(b); });
 
-function extractHashtags(text) {
-  return text.match(/#[\w\u00C0-\u017F]+/g) || [];
-}
-
-function renderGrid() {
-  const grid = document.getElementById('gridView');
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const filtered = notes.filter(n => 
-    n.title.toLowerCase().includes(search) || 
-    n.content.toLowerCase().includes(search)
-  );
-  
-  grid.innerHTML = filtered.map(note => `
-    <div class="note-card p-6 rounded-2xl cursor-pointer" 
-         onclick="openNote(${note.id})">
-      <h3 class="font-bold text-2xl mb-3 line-clamp-2 text-purple-900 handwriting">${note.title}</h3>
-      <p class="text-base text-gray-700 line-clamp-4 leading-relaxed">${note.content}</p>
-      <div class="mt-4 flex flex-wrap gap-2">
-        ${extractHashtags(note.title + ' ' + note.content).map(tag => 
-          `<span class="tag-neon text-sm px-3 py-1 rounded-full text-white font-semibold">${tag}</span>`
-        ).join('')}
-      </div>
-    </div>
-  `).join('');
-}
-
-function openNote(id) {
-  currentNote = notes.find(n => n.id === id);
-  if (!currentNote) return;
-  
-  document.getElementById('modalTitle').textContent = currentNote.title;
-  document.getElementById('modalContent').textContent = currentNote.content;
-  document.getElementById('modalTags').innerHTML = extractHashtags(currentNote.title + ' ' + currentNote.content)
-    .map(tag => `<span class="tag-neon px-4 py-2 rounded-full text-white font-bold text-lg">${tag}</span>`).join('');
-  
-  document.getElementById('viewMode').style.display = 'block';
-  document.getElementById('editMode').style.display = 'none';
-  document.getElementById('btnEdit').style.display = 'block';
-  document.getElementById('btnSave').style.display = 'none';
-  document.getElementById('modal').style.display = 'flex';
-}
-
-// Event Listeners
-document.getElementById('btnAdd').onclick = () => {
-  const newNote = {
-    id: Date.now(),
-    title: 'Nova Nota ✨',
-    content: '',
-    color: colors[Math.floor(Math.random() * colors.length)],
-    created: new Date().toISOString()
-  };
-  notes.unshift(newNote);
-  saveNotes();
-  renderGrid();
-  openNote(newNote.id);
-  document.getElementById('btnEdit').click();
-};
-
-document.getElementById('btnGrid').onclick = () => {
-  document.getElementById('gridView').style.display = 'grid';
-  document.getElementById('graphView').style.display = 'none';
-  document.getElementById('btnGrid').className = 'btn-neon p-3 rounded-xl text-white text-xl';
-  document.getElementById('btnGraph').className = 'p-3 bg-purple-800/50 hover:bg-purple-700/70 rounded-xl text-white text-xl transition';
-};
-
-document.getElementById('btnGraph').onclick = () => {
-  document.getElementById('gridView').style.display = 'none';
-  document.getElementById('graphView').style.display = 'block';
-  document.getElementById('btnGraph').className = 'btn-neon p-3 rounded-xl text-white text-xl';
-  document.getElementById('btnGrid').className = 'p-3 bg-purple-800/50 hover:bg-purple-700/70 rounded-xl text-white text-xl transition';
-  initThreeJS();
-};
-
-document.getElementById('btnEdit').onclick = () => {
-  document.getElementById('editTitle').value = currentNote.title;
-  document.getElementById('editContent').value = currentNote.content;
-  document.getElementById('viewMode').style.display = 'none';
-  document.getElementById('editMode').style.display = 'block';
-  document.getElementById('btnEdit').style.display = 'none';
-  document.getElementById('btnSave').style.display = 'block';
-  
-  const picker = document.getElementById('colorPicker');
-  picker.innerHTML = colors.map(c => 
-    `<button onclick="setColor('${c}')" class="w-10 h-10 rounded-full border-3 hover:scale-110 transition" style="background-color:${c}; box-shadow: 0 0 10px ${c};"></button>`
-  ).join('');
-};
-
-document.getElementById('btnColorPicker').onclick = () => {
-  const picker = document.getElementById('colorPicker');
-  picker.style.display = picker.style.display === 'none' ? 'flex' : 'none';
-};
-
-function setColor(color) {
-  currentNote.color = color;
-}
-
-document.getElementById('btnSave').onclick = () => {
-  currentNote.title = document.getElementById('editTitle').value;
-  currentNote.content = document.getElementById('editContent').value;
-  saveNotes();
-  renderGrid();
-  openNote(currentNote.id);
-};
-
-document.getElementById('btnDelete').onclick = () => {
-  if (confirm('🗑️ Excluir esta nota?')) {
-    notes = notes.filter(n => n.id !== currentNote.id);
-    saveNotes();
-    renderGrid();
-    document.getElementById('modal').style.display = 'none';
-  }
-};
-
-document.getElementById('btnCloseModal').onclick = () => {
-  document.getElementById('modal').style.display = 'none';
-};
-
-document.getElementById('searchInput').oninput = renderGrid;
-
-document.getElementById('btnExport').onclick = () => {
-  const data = JSON.stringify(notes, null, 2);
-  const blob = new Blob([data], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'meu-universo-x-backup.json';
-  a.click();
-};
-
-document.getElementById('importFile').onchange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const imported = JSON.parse(event.target.result);
-        notes = [...imported, ...notes];
-        saveNotes();
-        renderGrid();
-      } catch (err) {
-        alert('Erro ao importar arquivo');
-      }
-    };
-    reader.readAsText(file);
-  }
-};
-
-function shareNote(platform) {
-  const text = `${currentNote.title}\n\n${currentNote.content}`;
-  const encoded = encodeURIComponent(text);
-  const urls = {
-    whatsapp: `https://wa.me/?text=${encoded}`,
-    telegram: `https://t.me/share/url?text=${encoded}`,
-    email: `mailto:?subject=${encodeURIComponent(currentNote.title)}&body=${encoded}`
-  };
-  window.open(urls[platform], '_blank');
-}
-
-function exportNote(format) {
-  let content = '', filename = '';
-  if (format === 'txt') {
-    content = `${currentNote.title}\n\n${currentNote.content}`;
-    filename = `${currentNote.title}.txt`;
-  } else if (format === 'md') {
-    content = `# ${currentNote.title}\n\n${currentNote.content}`;
-    filename = `${currentNote.title}.md`;
-  }
-  const blob = new Blob([content], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-}
-
-// Three.js
-function initThreeJS() {
-  if (scene) return;
-  
-  const canvas = document.getElementById('canvas3d');
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0a0a1f);
-  
-  camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
-  camera.position.z = 30;
-  
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-  
-  const particlesGeometry = new THREE.BufferGeometry();
-  const positions = new Float32Array(5000);
-  for (let i = 0; i < 5000; i++) positions[i] = (Math.random() - 0.5) * 100;
-  particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  const particles = new THREE.Points(particlesGeometry, new THREE.PointsMaterial({ color: 0x8b5cf6, size: 0.15 }));
-  scene.add(particles);
-  
-  const light = new THREE.AmbientLight(0xffffff, 0.6);
-  scene.add(light);
-  const pointLight = new THREE.PointLight(0x8b5cf6, 2);
-  pointLight.position.set(0, 0, 20);
-  scene.add(pointLight);
-  
-  canvas.onclick = onCanvasClick;
-  updateGraph();
-  animate();
-}
-
-function updateGraph() {
-  if (!scene) return;
-  
-  noteMeshes.forEach(m => {
-    scene.remove(m);
-    if (m.geometry) m.geometry.dispose();
-    if (m.material) m.material.dispose();
+  // import/export
+  document.getElementById('export-all').addEventListener('click', ()=>{
+    const blob=new Blob([JSON.stringify(notes, null, 2)], {type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='meu-universo-x-notes.json'; a.click();
   });
-  noteMeshes = [];
-  
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const filtered = notes.filter(n => 
-    n.title.toLowerCase().includes(search) || 
-    n.content.toLowerCase().includes(search)
-  );
-  
-  const hashtagMap = {};
-  filtered.forEach(note => {
-    const tags = extractHashtags(note.title + ' ' + note.content);
-    tags.forEach(tag => {
-      if (!hashtagMap[tag]) hashtagMap[tag] = [];
-      hashtagMap[tag].push(note.id);
+  document.getElementById('import-all').addEventListener('click', ()=>{
+    const f=document.createElement('input'); f.type='file'; f.accept='application/json'; f.onchange=e=>{
+      const fr=new FileReader(); fr.onload=ev=>{ try{ const imp=JSON.parse(ev.target.result); if(Array.isArray(imp)){ notes=imp; saveAll(); alert('Import OK') }else alert('Formato inválido') }catch(er){ alert('Erro: '+er.message) } }; fr.readAsText(e.target.files[0]);
+    }; f.click();
+  });
+
+  /* ============================
+     GRID RENDER
+     ============================*/
+  const grid = document.getElementById('grid');
+  function renderGrid(){
+    grid.innerHTML='';
+    // order: pinned first, then updated
+    const ordered = [...notes].sort((a,b)=> (b.pinned?1:0)-(a.pinned?1:0) || b.updatedAt-a.updatedAt );
+    ordered.forEach(n=>{
+      const card=document.createElement('div'); card.className='postit note-card';
+      card.style.background=n.color||colors[0]; card.style.border='1px solid rgba(0,0,0,0.06)';
+      const tagsHtml = (n.tags||[]).map(t=>`<span class="tag-pill mr-2">${escapeHtml(t)}</span>`).join(' ');
+      card.innerHTML = `
+        <div class="flex justify-between items-start">
+          <div>
+            <div class="font-semibold text-sm text-black">${escapeHtml(n.title||'Sem título')}</div>
+            <div class="text-xs mt-2 text-black/80 line-clamp-3">${escapeHtml(n.body||'')}</div>
+            <div class="mt-3">${tagsHtml}</div>
+          </div>
+          <div class="flex flex-col gap-2">
+            <button class="open-btn px-2 py-1 text-xs border" data-id="${n.id}">Abrir</button>
+            <button class="more-btn px-2 py-1 text-xs border" data-id="${n.id}">Partilhar</button>
+          </div>
+        </div>
+      `;
+      card.querySelector('.open-btn').addEventListener('click', ()=> openEditor(n.id));
+      card.querySelector('.more-btn').addEventListener('click', ()=> shareByOptions(n.id));
+      grid.appendChild(card);
     });
+  }
+
+  /* ============================
+     EDITOR
+     ============================*/
+  const modal = document.getElementById('modal');
+  const tTitle = document.getElementById('note-title');
+  const tBody = document.getElementById('note-body');
+  const mdToggle = document.getElementById('md-toggle');
+  const saveBtn = document.getElementById('save-note');
+  const closeBtn = document.getElementById('close-note');
+  const shareBtn = document.getElementById('share-note');
+  const exportTxt = document.getElementById('export-txt');
+  const exportMd = document.getElementById('export-md');
+  const pinBtn = document.getElementById('pin-btn');
+  const reminderInp = document.getElementById('reminder');
+
+  function openEditor(id){
+    currentId=id;
+    if(id){
+      const n = notes.find(x=>x.id===id); if(!n) return;
+      tTitle.value = n.title || ''; tBody.value = n.body || '';
+      // choose palette
+      document.querySelectorAll('#color-palette button').forEach(b=>b.style.outline=''); [...document.querySelectorAll('#color-palette button')].find(b=>b.style.backgroundColor==rgbFromHex(n.color))?.style.outline='3px solid rgba(0,0,0,0.06)';
+      pinBtn.textContent = n.pinned ? 'Pinned' : 'Pin';
+      reminderInp.value = n.reminder ? new Date(n.reminder).toISOString().slice(0,16) : '';
+    }else{
+      tTitle.value=''; tBody.value=''; document.querySelectorAll('#color-palette button').forEach(b=>b.style.outline=''); palette.children[0].style.outline='3px solid rgba(0,0,0,0.06)';
+      pinBtn.textContent='Pin'; reminderInp.value='';
+    }
+    modal.classList.remove('hidden'); modal.style.display='flex';
+  }
+  closeBtn.addEventListener('click', ()=>{ modal.classList.add('hidden'); modal.style.display='none'; currentId=null; });
+
+  saveBtn.addEventListener('click', ()=>{
+    const colBtn = [...document.querySelectorAll('#color-palette button')].find(b=>b.dataset.chosen==='1') || palette.children[0];
+    const color = hexFromRgb(colBtn.style.backgroundColor || colBtn.style.background);
+    const title = tTitle.value.trim();
+    const body = tBody.value.trim();
+    const tags = extractTags((title+' '+body));
+    const links = extractWikilinks(body);
+    const reminder = reminderInp.value ? new Date(reminderInp.value).getTime() : null;
+    if(currentId){
+      const n = notes.find(x=>x.id===currentId);
+      Object.assign(n, { title, body, color, tags, links, updatedAt:now(), reminder });
+    }else{
+      notes.push({ id:uid(), title, body, color, tags, links, pinned:false, createdAt:now(), updatedAt:now(), reminder });
+    }
+    saveAll(); closeBtn.click();
   });
-  
-  const radius = 15;
-  filtered.forEach((note, i) => {
-    const angle = (i / filtered.length) * Math.PI * 2;
-    const x = Math.cos(angle) * radius;
-    const y = Math.sin(angle) * radius;
-    const z = (Math.random() - 0.5) * 10;
-    
-    const geometry = new THREE.SphereGeometry(1, 20, 20);
-    const material = new THREE.MeshPhongMaterial({ 
-      color: note.color,
-      emissive: note.color,
-      emissiveIntensity: 0.3,
-      shininess: 100
-    });
-    const sphere = new THREE.Mesh(geometry, material);
-    sphere.position.set(x, y, z);
-    sphere.userData = { noteId: note.id, originalY: y };
-    scene.add(sphere);
-    noteMeshes.push(sphere);
+
+  pinBtn.addEventListener('click', ()=>{
+    if(!currentId) return;
+    const n = notes.find(x=>x.id===currentId); if(!n) return;
+    n.pinned = !n.pinned; saveAll(); pinBtn.textContent = n.pinned ? 'Pinned' : 'Pin';
   });
-  
-  Object.values(hashtagMap).forEach(noteIds => {
-    if (noteIds.length > 1) {
-      for (let i = 0; i < noteIds.length; i++) {
-        for (let j = i + 1; j < noteIds.length; j++) {
-          const m1 = noteMeshes.find(m => m.userData.noteId === noteIds[i]);
-          const m2 = noteMeshes.find(m => m.userData.noteId === noteIds[j]);
-          if (m1 && m2) {
-            const points = [m1.position.clone(), m2.position.clone()];
-            const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
-            const lineMaterial = new THREE.LineBasicMaterial({ 
-              color: 0x8b5cf6, 
-              transparent: true, 
-              opacity: 0.5,
-              linewidth: 2
-            });
-            const line = new THREE.Line(lineGeometry, lineMaterial);
-            line.userData = { mesh1: m1, mesh2: m2, isConnection: true };
-            scene.add(line);
-            noteMeshes.push(line);
-          }
-        }
+
+  shareBtn.addEventListener('click', ()=>{ if(!currentId) return; const n=notes.find(x=>x.id===currentId); navigatorShareNote(n); });
+  exportTxt.addEventListener('click', ()=>{ if(!currentId) return; const n=notes.find(x=>x.id===currentId); downloadBlob((n.title? n.title + '\n\n':'')+n.body,'text/plain', (n.title||'nota')+'.txt'); });
+  exportMd.addEventListener('click', ()=>{ if(!currentId) return; const n=notes.find(x=>x.id===currentId); downloadBlob((n.title? '# '+n.title +'\n\n':'')+n.body,'text/markdown',(n.title||'nota')+'.md'); });
+
+  function navigatorShareNote(n){
+    if(!n) return;
+    const text = (n.title? n.title + '\n\n':'' ) + n.body;
+    if(navigator.share){ navigator.share({title:n.title,text:n.body}).catch(()=>{}); return; }
+    // fallback: open small window with links
+    const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    const mail = `mailto:?subject=${encodeURIComponent(n.title)}&body=${encodeURIComponent(text)}`;
+    const win=window.open('', '_blank'); win.document.body.innerHTML = `<p><a href="${wa}" target="_blank">WhatsApp</a></p><p><a href="${mail}" target="_blank">Email</a></p>`;
+  }
+
+  function shareByOptions(id){
+    const n = notes.find(x=>x.id===id); if(!n) return;
+    navigatorShareNote(n);
+  }
+
+  function downloadBlob(content,type,filename){
+    const blob=new Blob([content],{type}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click();
+  }
+
+  function rgbFromHex(hex){
+    if(!hex) return hex;
+    const c=hex.replace('#',''); const r=parseInt(c.slice(0,2),16), g=parseInt(c.slice(2,4),16), b=parseInt(c.slice(4,6),16); return `rgb(${r}, ${g}, ${b})`;
+  }
+  function hexFromRgb(rgb){
+    if(!rgb) return '#fff9e6';
+    const m=rgb.match(/(\d+),\s*(\d+),\s*(\d+)/); if(!m) return rgb;
+    return '#'+[1,2,3].map(i=>Number(m[i]).toString(16).padStart(2,'0')).join('');
+  }
+  function hexFromRgbVar(x){ return hexFromRgb(x) }
+
+  /* ============================
+     BUSCA
+     ============================*/
+  function highlightSearch(q){
+    const cards = grid.children;
+    for(let i=0;i<cards.length;i++){
+      const c=cards[i]; const text=c.innerText.toLowerCase();
+      c.style.opacity = q ? (text.includes(q) ? '1':'0.25') : '1';
+      if(q && q.startsWith('#') && text.includes(q)) c.style.transform='scale(1.02)'; else c.style.transform='';
+    }
+    // graph highlight if visible
+    if(graphReady){
+      nodesMesh.forEach(n=>{
+        const note = notes.find(x=>x.id===n.metaId); if(!note) return;
+        const text = (note.title+' '+note.body+' '+(note.tags||[]).join(' ')).toLowerCase();
+        const match = q ? text.includes(q) : true;
+        n.mesh.material.opacity = match ? 1 : 0.2;
+        n.mesh.scale.lerp(new THREE.Vector3(match?1.8:1,match?1.8:1,match?1.8:1), 0.08);
+      });
+    }
+  }
+
+  /* ============================
+     MARKDOWN PREVIEW (WIKILINKS -> LINKS)
+     ============================*/
+  marked.setOptions({ mangle:false, headerIds:false });
+  window.renderMarkdown = function(md){
+    if(!md) return '';
+    // convert wikilinks [[Title]] into links that open editor
+    const html = marked.parse(md);
+    return html.replace(/\[\[([^\]]+)\]\]/g, (m, p1)=>`<a href="#" class="wikilink" data-target="${p1}">${p1}</a>`);
+  }
+  // delegate click of wikilinks in rendered HTML to open editor if exists or create new
+  document.addEventListener('click', (e)=>{
+    if(e.target.matches('.wikilink')){
+      e.preventDefault();
+      const targetTitle = e.target.dataset.target;
+      const found = notes.find(n=> (n.title||'').toLowerCase()===targetTitle.toLowerCase());
+      if(found) openEditor(found.id);
+      else{
+        // create new note with that title
+        const id = uid();
+        const newNote = { id, title: targetTitle, body:'', color:colors[0], tags:[], links:[], pinned:false, createdAt:now(), updatedAt:now() };
+        notes.push(newNote); saveAll(); openEditor(id);
       }
     }
   });
-}
 
-function animate() {
-  animationFrame = requestAnimationFrame(animate);
-  if (camera && scene) {
-    camera.rotation.y += 0.001;
-    noteMeshes.forEach(mesh => {
-      if (mesh.geometry && mesh.geometry.type === 'SphereGeometry') {
-        mesh.position.y = mesh.userData.originalY + Math.sin(Date.now() * 0.001 + mesh.position.x) * 0.4;
-        mesh.rotation.y += 0.015;
-        mesh.material.emissiveIntensity = 0.3 + Math.sin(Date.now() * 0.002) * 0.2;
-      }
-      if (mesh.userData && mesh.userData.isConnection) {
-        const pos = mesh.geometry.attributes.position.array;
-        pos[0] = mesh.userData.mesh1.position.x;
-        pos[1] = mesh.userData.mesh1.position.y;
-        pos[2] = mesh.userData.mesh1.position.z;
-        pos[3] = mesh.userData.mesh2.position.x;
-        pos[4] = mesh.userData.mesh2.position.y;
-        pos[5] = mesh.userData.mesh2.position.z;
-        mesh.geometry.attributes.position.needsUpdate = true;
+  /* ============================
+     GRAPH (Three.js)
+     ============================*/
+  let renderer, scene, camera; let graphReady=false; const nodesMesh=[]; const lines=[];
+  initThree();
+  function initThree(){
+    const canvas = document.getElementById('canvas3d');
+    renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+    renderer.setPixelRatio(window.devicePixelRatio); renderer.setSize(canvas.clientWidth || window.innerWidth, window.innerHeight);
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(60,(canvas.clientWidth||window.innerWidth)/window.innerHeight,0.1,2000); camera.position.set(0,0,140);
+    scene.add(new THREE.AmbientLight(0xffffff,0.8));
+    // particles
+    const g = new THREE.BufferGeometry(); const cnt=600; const arr = new Float32Array(cnt*3);
+    for(let i=0;i<cnt;i++){ arr[i*3+0]=(Math.random()-0.5)*800; arr[i*3+1]=(Math.random()-0.5)*400; arr[i*3+2]=(Math.random()-0.5)*800; }
+    g.setAttribute('position', new THREE.BufferAttribute(arr,3));
+    const pts = new THREE.Points(g, new THREE.PointsMaterial({size:1, color:0x8b5cf6, transparent:true, opacity:0.05}));
+    scene.add(pts);
+
+    // simple pointer orbit
+    let isDown=false, last=[0,0];
+    canvas.addEventListener('pointerdown', e=>{ isDown=true; last=[e.clientX,e.clientY]; canvas.style.cursor='grabbing'; });
+    window.addEventListener('pointerup', ()=>{ isDown=false; canvas.style.cursor='grab'; });
+    canvas.addEventListener('pointermove', e=>{ if(!isDown) return; const dx=(e.clientX-last[0])/200; const dy=(e.clientY-last[1])/200; scene.rotation.y += dx; scene.rotation.x += dy; last=[e.clientX,e.clientY]; });
+
+    canvas.addEventListener('wheel', e=>{ e.preventDefault(); camera.position.z += e.deltaY*0.02; camera.position.z = Math.max(40, Math.min(1200, camera.position.z)); }, {passive:false});
+
+    // raycast on click
+    const ray = new THREE.Raycaster(); const mouse = new THREE.Vector2();
+    canvas.addEventListener('click', ev=>{ const rect=canvas.getBoundingClientRect(); mouse.x = ((ev.clientX-rect.left)/rect.width)*2-1; mouse.y = -((ev.clientY-rect.top)/rect.height)*2+1; ray.setFromCamera(mouse,camera); const ints = ray.intersectObjects(nodesMesh.map(x=>x.mesh)); if(ints.length){ const id = ints[0].object.userData.metaId; openEditor(id); } });
+
+    window.addEventListener('resize', ()=>{ renderer.setSize(canvas.clientWidth||window.innerWidth, window.innerHeight); camera.aspect=(canvas.clientWidth||window.innerWidth)/window.innerHeight; camera.updateProjectionMatrix(); });
+
+    (function animate(){ requestAnimationFrame(animate);
+      nodesMesh.forEach(n=>{
+        n.mesh.position.x += (n.target.x - n.mesh.position.x)*0.04;
+        n.mesh.position.y += (n.target.y - n.mesh.position.y)*0.04;
+        n.mesh.position.z += (n.target.z - n.mesh.position.z)*0.04;
+        n.mesh.scale.lerp(new THREE.Vector3(n.scaleTarget||1,n.scaleTarget||1,n.scaleTarget||1),0.06);
+      });
+      lines.forEach(l=>{
+        const p = l.geometry.attributes.position.array;
+        p[0]=l.a.mesh.position.x; p[1]=l.a.mesh.position.y; p[2]=l.a.mesh.position.z;
+        p[3]=l.b.mesh.position.x; p[4]=l.b.mesh.position.y; p[5]=l.b.mesh.position.z;
+        l.geometry.attributes.position.needsUpdate=true;
+      });
+      renderer.render(scene,camera);
+    })();
+
+    graphReady=true; rebuildGraph();
+  }
+
+  function clearGraph(){ nodesMesh.forEach(n=>scene.remove(n.mesh)); lines.forEach(l=>scene.remove(l)); nodesMesh.length=0; lines.length=0; }
+
+  function rebuildGraph(){
+    if(!graphReady) return; clearGraph();
+    const radius=5; const spread=70;
+    notes.forEach((n,i)=>{
+      const geo = new THREE.SphereGeometry(radius, 24, 24);
+      const mat = new THREE.MeshStandardMaterial({color:hexToNum(n.color||colors[0]), roughness:0.7, metalness:0.05, transparent:true, opacity:1});
+      const m = new THREE.Mesh(geo,mat); const pos={x:(Math.random()-0.5)*spread + (i%5)*6, y:(Math.random()-0.5)*spread, z:(Math.random()-0.5)*spread};
+      m.position.set(pos.x,pos.y,pos.z); m.userData.metaId = n.id; scene.add(m);
+      nodesMesh.push({mesh:m,metaId:n.id,target:pos,scaleTarget:1});
+    });
+    // connections: tags and wikilinks
+    const map = {};
+    notes.forEach(n=>{ (n.tags||[]).forEach(t=>{ map[t]=map[t]||[]; map[t].push(n.id) }); (n.links||[]).forEach(L=>{ map['__wikilink__'+L]=map['__wikilink__'+L]||[]; map['__wikilink__'+L].push(n.id) }) });
+    const linked = new Set();
+    Object.values(map).forEach(arr=>{
+      for(let i=0;i<arr.length;i++) for(let j=i+1;j<arr.length;j++){
+        const a=arr[i], b=arr[j]; const key=[a,b].sort().join('::'); if(linked.has(key)) continue; linked.add(key);
+        const A = nodesMesh.find(x=>x.metaId===a), B = nodesMesh.find(x=>x.metaId===b); if(!A||!B) continue;
+        const geom = new THREE.BufferGeometry(); const posArr = new Float32Array(6); geom.setAttribute('position', new THREE.BufferAttribute(posArr,3));
+        const mat = new THREE.LineBasicMaterial({color:0x8b5cf6, transparent:true, opacity:0.28});
+        const line = new THREE.Line(geom, mat); line.a=A; line.b=B; line.geometry=geom; scene.add(line); lines.push(line);
       }
     });
-    renderer?.render(scene, camera);
   }
-}
 
-function onCanvasClick(e) {
-  if (!camera || !scene) return;
-  const canvas = document.getElementById('canvas3d');
-  const
+  function hexToNum(hex){ return parseInt((hex||'#ffffff').replace('#',''),16) }
+
+  /* ============================
+     BOOTSTRAP & DEMO NOTE
+     ============================*/
+  loadAll();
+  if(notes.length===0){
+    notes.push({
+      id:uid(), title:'Ideias iniciais', body:'Bem-vindo ao Meu Universo X! Use #exemplo e [[Nova Nota]] para testar ligações.', color:colors[0], tags:['#exemplo'], links:['Nova Nota'], pinned:true, createdAt:now(), updatedAt:now()
+    });
+    saveAll();
+  } else { renderGrid(); rebuildGraph(); }
+
+  renderGrid();
+
+  // periodic small motion
+  setInterval(()=>{ nodesMesh.forEach(n=>{ n.target.x += (Math.random()-0.5)*6; n.target.y += (Math.random()-0.5)*4; n.target.z += (Math.random()-0.5)*6; }); }, 2400);
+
+  // reminders simple checker
+  setInterval(()=>{
+    const nowTs = Date.now();
+    notes.forEach(n=>{ if(n.reminder && n.reminder <= nowTs && !n._remNotified){ alert('Lembrete: '+(n.title||'Sem título')); n._remNotified=true; } });
+  }, 60000);
+
+  // small utilities exposed
+  window.MUX = { notes, saveAll, loadAll, rebuildGraph, renderGrid };
+
+  // helper: open by title (used by wikilinks code)
+  window.openNoteByTitle = function(title){ const f = notes.find(x=> (x.title||'').toLowerCase()===title.toLowerCase()); if(f) openEditor(f.id); else { const id=uid(); notes.push({id,title,body:'',color:colors[0],tags:[],links:[],createdAt:now(),updatedAt:now()}); saveAll(); openEditor(id); } };
+
+  // keyboard: Ctrl/Cmd+N create new
+  window.addEventListener('keydown', (e)=>{ if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='n'){ e.preventDefault(); openEditor(null); } });
+
+  </script>
+</body>
+</html>

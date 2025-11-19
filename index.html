@@ -1,454 +1,479 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Meu Universo X — Bloco de Notas</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Meu Universo X — Seguro (AES-GCM)</title>
 
-  <!-- Bibliotecas CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+<!-- Dependências CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-
-  <style>
-    :root{
-      --accent:#8b5cf6;
-      --bg-1:#060713;
-      --bg-2:#0b1220;
-    }
-    html,body,#app{height:100%}
-    body{
-      margin:0;
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
-      background: linear-gradient(180deg,var(--bg-1),var(--bg-2));
-      color:#e6eef8;
-    }
-    .handwriting{font-family:"Caveat",cursive}
-    .note-card{transition:all .18s ease}
-    .postit{min-height:84px;border-radius:10px;padding:12px;box-shadow:0 8px 28px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.04)}
-    .neon{ text-shadow:0 0 8px rgba(139,92,246,0.9) }
-    #canvas3d{width:100%;height:100%;display:block}
-    .hidden{display:none}
-    .tag-pill{font-size:12px;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,0.04)}
-    .modal-bg{backdrop-filter: blur(6px)}
-  </style>
+<style>
+  :root{--bg:#071021;--accent:#8b5cf6}
+  html,body,#app{height:100%}
+  body{margin:0;font-family:Inter,system-ui; background:linear-gradient(180deg,#071021,#041226); color:#eaf2ff}
+  .handwriting{font-family:'Caveat',cursive}
+  .btn { background:linear-gradient(90deg,var(--accent),#ec4899); color:white; padding:.5rem .9rem; border-radius:8px; }
+  .ghost{opacity:.06}
+  .postit{border-radius:10px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,0.6)}
+  .modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:60; background:rgba(1,4,10,0.6) }
+  .card { background:linear-gradient(145deg,#fff9e6,#fef5d4); color:#071021; padding:16px; border-radius:10px; box-shadow:0 20px 50px rgba(0,0,0,0.6)}
+  input,textarea{font-family:inherit}
+  .small{font-size:12px;color:rgba(0,0,0,0.6)}
+</style>
 </head>
 <body>
-  <div id="app" class="h-screen grid grid-rows-[auto_1fr]">
-    <!-- SPLASH -->
-    <div id="splash" class="fixed inset-0 z-50 flex items-center justify-center modal-bg" style="background:linear-gradient(180deg,rgba(2,6,23,0.95),rgba(5,9,20,0.98))">
-      <div class="text-center p-6">
-        <!-- usando a imagem enviada (caminho local solicitado) -->
-        <img id="splash-img" src='/mnt/data/A_composite_digital_screenshot_of_"Meu_Universo_X,.png' alt="Cientista" class="w-44 h-44 mx-auto mb-4" onerror="this.style.display='none';document.getElementById('splash-emoji').style.display='block'">
-        <div id="splash-emoji" style="display:none;font-size:72px;margin-bottom:8px">🐵</div>
-        <h1 class="handwriting text-4xl neon">Meu Universo X</h1>
-        <p class="mt-2 text-sm opacity-70">Obsidian + Google Keep — Markdown, grafos, post-its, offline.</p>
-        <div class="mt-6">
-          <button id="enter-btn" class="px-5 py-2 rounded-md" style="background:linear-gradient(90deg,var(--accent),#ec4899);color:white">Entrar</button>
+<div id="app" class="h-screen grid grid-rows-[auto_1fr]">
+  <!-- Header -->
+  <header class="flex items-center justify-between px-4 py-3 border-b border-white/6">
+    <div class="flex items-center gap-3">
+      <img id="logo" src='/mnt/data/A_composite_digital_screenshot_of_"Meu_Universo_X,.png' alt="macaco" class="w-10 h-10 rounded-md object-cover" onerror="this.style.display='none'">
+      <div>
+        <div class="font-semibold text-lg">Meu Universo X — Seguro</div>
+        <div class="text-xs opacity-70">Notas encriptadas localmente (AES-GCM-256)</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <input id="search" placeholder="Procurar..." class="bg-transparent border border-white/6 px-3 py-2 rounded-md" />
+      <button id="btn-new" class="btn">+ Nova</button>
+      <button id="btn-export" class="px-3 py-2 rounded border border-white/8">Export encriptado</button>
+      <button id="btn-import" class="px-3 py-2 rounded border border-white/8">Importar backup</button>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="p-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <section class="lg:col-span-2 relative" id="viz-area">
+      <canvas id="canvas3d" class="w-full h-96 bg-transparent"></canvas>
+      <div class="mt-4 grid grid-cols-3 gap-3" id="grid"></div>
+    </section>
+
+    <aside>
+      <div class="card">
+        <h3 class="font-semibold">Controle</h3>
+        <p class="small mt-2">Estado: <span id="lock-status">Bloqueado</span></p>
+        <div class="mt-4">
+          <button id="btn-lock" class="px-3 py-2 rounded border">Bloquear</button>
+          <button id="btn-change-pass" class="px-3 py-2 rounded border">Mudar Password</button>
         </div>
+        <div class="mt-4">
+          <label class="small">Auto-lock (min)</label>
+          <input id="auto-lock" type="number" value="5" min="1" class="w-full mt-1 p-2 rounded border small"/>
+        </div>
+        <div class="mt-4 small">Backups encriptados são seguros — guarda fora do navegador.</div>
+      </div>
+
+      <div class="card mt-4">
+        <h4 class="font-semibold">Ajuda rápida</h4>
+        <ul class="small mt-2">
+          <li>✅ A password nunca é enviada — só usada para derivar a chave.</li>
+          <li>✅ Backup exportado contém salt+iv+ciphertext.</li>
+          <li>⚠️ Se perderes a password, não há recuperação.</li>
+        </ul>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<!-- MODAIS -->
+<div id="modal-lock" class="modal" style="display:block">
+  <div class="card w-full max-w-md">
+    <h3 class="handwriting text-2xl">Meu Universo X — Acesso Seguro</h3>
+    <p class="small mt-1">Insere a tua password mestra para desbloquear as notas.</p>
+
+    <div id="first-setup" style="display:none">
+      <p class="mt-3 small">Parece que é a primeira utilização. Cria uma password forte (memorizá-la).</p>
+      <input id="new-pass" type="password" placeholder="Nova password" class="w-full mt-2 p-2 rounded border"/>
+      <input id="new-pass-confirm" type="password" placeholder="Confirmar password" class="w-full mt-2 p-2 rounded border"/>
+      <div class="flex gap-2 mt-3">
+        <button id="setup-btn" class="btn">Criar password</button>
       </div>
     </div>
 
-    <!-- HEADER -->
-    <header class="flex items-center justify-between px-4 py-3 border-b border-white/5">
-      <div class="flex items-center gap-3">
-        <img id="header-logo" src='/mnt/data/A_composite_digital_screenshot_of_"Meu_Universo_X,.png' alt="logo" class="w-10 h-10 rounded-md object-cover" onerror="this.style.display='none'">
-        <div>
-          <div class="text-lg font-semibold">Meu Universo X</div>
-          <div class="text-xs opacity-70">Cérebro 3D + Post-its</div>
-        </div>
+    <div id="login-area" style="display:none">
+      <input id="master-pass" type="password" placeholder="Password" class="w-full mt-3 p-2 rounded border"/>
+      <div class="flex gap-2 mt-3">
+        <button id="unlock-btn" class="btn">Desbloquear</button>
       </div>
-
-      <div class="flex items-center gap-3">
-        <input id="search" placeholder="Procurar (#tag ou texto)" class="bg-transparent border border-white/6 text-sm px-3 py-2 rounded-md w-72" />
-        <button id="toggle-view" class="px-3 py-2 rounded bg-white/5">Grid</button>
-        <button id="new-note" class="px-3 py-2 rounded bg-white/5">+ Nova</button>
-        <div class="flex gap-2">
-          <button id="export-all" class="px-2 py-2 rounded bg-white/5 text-sm">Export JSON</button>
-          <button id="import-all" class="px-2 py-2 rounded bg-white/5 text-sm">Import</button>
-        </div>
-      </div>
-    </header>
-
-    <!-- MAIN AREA -->
-    <main class="relative flex-1 grid grid-cols-1 lg:grid-cols-3">
-      <!-- CANVAS / GRAFO (esconde em mobile) -->
-      <section id="viz" class="lg:col-span-2 relative hidden lg:block">
-        <canvas id="canvas3d"></canvas>
-        <div style="position:absolute;left:12px;top:12px;color:rgba(255,255,255,0.85);font-size:13px">
-          <div>Grafo 3D — clique numa esfera para abrir nota • Drag para rotacionar</div>
-        </div>
-      </section>
-
-      <!-- GRID / LIST -->
-      <aside id="grid-area" class="p-4 overflow-auto">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="grid"></div>
-      </aside>
-
-      <!-- EDITOR MODAL -->
-      <div id="modal" class="fixed inset-0 z-40 hidden items-center justify-center modal-bg">
-        <div class="w-full max-w-4xl p-4 rounded-lg" style="background:linear-gradient(145deg,#fff9e6,#f8f0d6);color:#0b1220">
-          <div class="flex gap-4">
-            <div class="flex-1">
-              <input id="note-title" placeholder="Título" class="w-full p-2 rounded mb-2 border" />
-              <div class="flex gap-2 mb-2">
-                <button id="md-toggle" class="px-2 py-1 rounded border">Markdown</button>
-                <button id="pin-btn" class="px-2 py-1 rounded border">Pin</button>
-                <input id="reminder" type="datetime-local" class="px-2 py-1 rounded border text-sm" />
-              </div>
-              <textarea id="note-body" rows="10" class="w-full p-3 rounded border" placeholder="Escreve em Markdown. Usa #tags e [[Wikilinks]]."></textarea>
-            </div>
-            <div style="width:220px;">
-              <label class="block mb-1 text-sm">Cor (post-it)</label>
-              <div id="color-palette" class="grid grid-cols-4 gap-2 mb-4"></div>
-              <div class="flex gap-2">
-                <button id="save-note" class="px-3 py-2 rounded" style="background:linear-gradient(90deg,var(--accent),#ec4899);color:#fff">Salvar</button>
-                <button id="close-note" class="px-3 py-2 rounded border">Fechar</button>
-              </div>
-              <div class="mt-4 text-sm">
-                <button id="share-note" class="w-full px-3 py-2 rounded bg-white/5">Partilhar</button>
-                <button id="export-txt" class="w-full mt-2 px-3 py-2 rounded bg-white/5">Exportar .txt</button>
-                <button id="export-md" class="w-full mt-2 px-3 py-2 rounded bg-white/5">Exportar .md</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </main>
+      <p class="small mt-2">Se não lembrares a password, não há recuperação — por design.</p>
+    </div>
   </div>
+</div>
 
-  <script>
-  /* ============================
-     CONFIG E STATE
-     ============================*/
-  const STORAGE_KEY = 'meu_universo_x_v2';
-  const colors = [
-    '#fff9e6','#fff1cc','#ffe8b8','#ffd6a5','#ffd7b9',
-    '#ffd1dc','#ffe2f0','#f0e7ff','#e7f0ff','#dff7ff',
-    '#fef3c7','#fde68a','#fca5a5','#fbcfe8','#f8ccff',
-    '#e9d5ff','#c7d2fe','#bbf7d0','#bbf7fe','#fef08a'
-  ];
-  let notes = []; // {id,title,body,color,tags,links,createdAt,updatedAt,pinned,reminder}
-  let currentId = null;
-  let view='grid'; // grid or graph
-
-  /* ============================
-     UTIL
-     ============================*/
-  function uid(){ return 'n_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7) }
-  function saveAll(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); rebuildGraph(); renderGrid(); }
-  function loadAll(){ try{ notes = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }catch(e){ notes=[] } }
-  function now(){ return Date.now() }
-  function extractTags(text){ const s=new Set(); (text||'').split(/\s+/).forEach(w=>{ if(w.startsWith('#') && w.length>1){ s.add(w.replace(/[^#\w-]/g,'').toLowerCase()) } }); return [...s] }
-  function extractWikilinks(text){ const s=new Set(); const re=/\[\[([^\]]+)\]\]/g; let m; while((m=re.exec(text))){ s.add(m[1].trim()) } return [...s] }
-  function escapeHtml(s){ if(!s) return ''; return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;') }
-
-  /* ============================
-     UI HOOKS
-     ============================*/
-  document.getElementById('enter-btn').addEventListener('click', ()=> document.getElementById('splash').style.display='none');
-  document.getElementById('new-note').addEventListener('click', ()=> openEditor(null));
-  document.getElementById('toggle-view').addEventListener('click', toggleView);
-  document.getElementById('search').addEventListener('input', ()=> highlightSearch(document.getElementById('search').value.trim().toLowerCase()));
-
-  // palette build
-  const palette = document.getElementById('color-palette');
-  colors.forEach(c=>{ const b=document.createElement('button'); b.className='w-full h-8 rounded'; b.style.background=c; b.onclick=()=>{ document.querySelectorAll('#color-palette button').forEach(x=>x.style.outline=''); b.style.outline='3px solid rgba(0,0,0,0.06)'; b.dataset.chosen='1' }; palette.appendChild(b); });
-
-  // import/export
-  document.getElementById('export-all').addEventListener('click', ()=>{
-    const blob=new Blob([JSON.stringify(notes, null, 2)], {type:'application/json'});
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='meu-universo-x-notes.json'; a.click();
-  });
-  document.getElementById('import-all').addEventListener('click', ()=>{
-    const f=document.createElement('input'); f.type='file'; f.accept='application/json'; f.onchange=e=>{
-      const fr=new FileReader(); fr.onload=ev=>{ try{ const imp=JSON.parse(ev.target.result); if(Array.isArray(imp)){ notes=imp; saveAll(); alert('Import OK') }else alert('Formato inválido') }catch(er){ alert('Erro: '+er.message) } }; fr.readAsText(e.target.files[0]);
-    }; f.click();
-  });
-
-  /* ============================
-     GRID RENDER
-     ============================*/
-  const grid = document.getElementById('grid');
-  function renderGrid(){
-    grid.innerHTML='';
-    // order: pinned first, then updated
-    const ordered = [...notes].sort((a,b)=> (b.pinned?1:0)-(a.pinned?1:0) || b.updatedAt-a.updatedAt );
-    ordered.forEach(n=>{
-      const card=document.createElement('div'); card.className='postit note-card';
-      card.style.background=n.color||colors[0]; card.style.border='1px solid rgba(0,0,0,0.06)';
-      const tagsHtml = (n.tags||[]).map(t=>`<span class="tag-pill mr-2">${escapeHtml(t)}</span>`).join(' ');
-      card.innerHTML = `
-        <div class="flex justify-between items-start">
-          <div>
-            <div class="font-semibold text-sm text-black">${escapeHtml(n.title||'Sem título')}</div>
-            <div class="text-xs mt-2 text-black/80 line-clamp-3">${escapeHtml(n.body||'')}</div>
-            <div class="mt-3">${tagsHtml}</div>
-          </div>
-          <div class="flex flex-col gap-2">
-            <button class="open-btn px-2 py-1 text-xs border" data-id="${n.id}">Abrir</button>
-            <button class="more-btn px-2 py-1 text-xs border" data-id="${n.id}">Partilhar</button>
-          </div>
+<!-- EDITOR (modal simples) -->
+<div id="modal-editor" class="modal" style="display:none">
+  <div class="card max-w-3xl w-full">
+    <div class="flex justify-between items-start">
+      <div>
+        <input id="edit-title" placeholder="Título" class="w-full p-2 rounded border" />
+        <textarea id="edit-body" rows="8" class="w-full mt-2 p-3 rounded border" placeholder="Escreve... usa #tags e [[Wikilinks]]"></textarea>
+      </div>
+      <div style="width:220px;margin-left:12px">
+        <label class="small">Cor</label>
+        <input id="edit-color" type="color" value="#fff1cc" class="w-full mt-2 p-2 rounded border"/>
+        <div class="mt-3 flex gap-2">
+          <button id="save-note" class="btn">Salvar</button>
+          <button id="close-editor" class="px-3 py-2 rounded border">Fechar</button>
         </div>
-      `;
-      card.querySelector('.open-btn').addEventListener('click', ()=> openEditor(n.id));
-      card.querySelector('.more-btn').addEventListener('click', ()=> shareByOptions(n.id));
-      grid.appendChild(card);
-    });
+        <div class="mt-3">
+          <button id="del-note" class="px-3 py-2 rounded border">Excluir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================
+   Segurança criptográfica - AES-GCM via WebCrypto
+   Design:
+   - password -> PBKDF2(salt) -> key (AES-GCM-256)
+   - salt salvo em localStorage (não sensível por si só)
+   - dados salvos em localStorage sob chave 'mux_cipher'
+   - export contém {salt, iv, data} em base64 JSON
+   - on first use: cria salt e pede password inicial
+   - timeout: auto-lock após X minutos (configurável)
+   ============================================*/
+
+const STORAGE_SALT = 'mux_salt_v1';
+const STORAGE_CIPHER = 'mux_cipher_v1';
+const STORAGE_META = 'mux_meta_v1'; // metadata optional
+let masterKey = null; // CryptoKey
+let unlocked = false;
+let notes = []; // in-memory decrypted notes
+let autoLockMinutes = 5;
+let autoLockTimer = null;
+let lastActivity = Date.now();
+
+/* ---------- helpers Base64 ---------- */
+function bufToB64(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))); }
+function b64ToBuf(b64){ const bin = atob(b64); const arr = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i); return arr.buffer; }
+
+/* ---------- derivation: PBKDF2 ---------- */
+async function deriveKeyFromPassword(password, saltBase64){
+  const enc = new TextEncoder();
+  const pwKey = await window.crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+  const salt = b64ToBuf(saltBase64);
+  const key = await window.crypto.subtle.deriveKey(
+    {name:'PBKDF2', salt, iterations:250000, hash:'SHA-256'},
+    pwKey,
+    {name:'AES-GCM', length:256},
+    false,
+    ['encrypt','decrypt']
+  );
+  return key;
+}
+
+/* ---------- random salt/iv ---------- */
+function randomBytes(n){ const arr = new Uint8Array(n); crypto.getRandomValues(arr); return arr.buffer; }
+function generateSalt(){ return bufToB64(randomBytes(16)); }
+function generateIV(){ return bufToB64(randomBytes(12)); }
+
+/* ---------- encrypt/decrypt ---------- */
+async function encryptNotesWithKey(key, plainObj){
+  const ivB64 = generateIV();
+  const enc = new TextEncoder();
+  const raw = enc.encode(JSON.stringify(plainObj));
+  const ciphertext = await crypto.subtle.encrypt({name:'AES-GCM', iv: b64ToBuf(ivB64)}, key, raw);
+  return { iv: ivB64, data: bufToB64(ciphertext) };
+}
+
+async function decryptNotesWithKey(key, ivB64, dataB64){
+  try{
+    const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv: b64ToBuf(ivB64)}, key, b64ToBuf(dataB64));
+    const dec = new TextDecoder().decode(pt);
+    return JSON.parse(dec);
+  }catch(e){
+    throw new Error('Desencriptação falhou — password errada ou dados corrompidos.');
   }
+}
 
-  /* ============================
-     EDITOR
-     ============================*/
-  const modal = document.getElementById('modal');
-  const tTitle = document.getElementById('note-title');
-  const tBody = document.getElementById('note-body');
-  const mdToggle = document.getElementById('md-toggle');
-  const saveBtn = document.getElementById('save-note');
-  const closeBtn = document.getElementById('close-note');
-  const shareBtn = document.getElementById('share-note');
-  const exportTxt = document.getElementById('export-txt');
-  const exportMd = document.getElementById('export-md');
-  const pinBtn = document.getElementById('pin-btn');
-  const reminderInp = document.getElementById('reminder');
+/* ---------- storage helpers ---------- */
+function saveCipherToStorage(saltB64, ivB64, dataB64){
+  const payload = { salt: saltB64, iv: ivB64, data: dataB64, timestamp: Date.now() };
+  localStorage.setItem(STORAGE_CIPHER, JSON.stringify(payload));
+}
+function loadCipherFromStorage(){ const raw = localStorage.getItem(STORAGE_CIPHER); return raw ? JSON.parse(raw) : null; }
+function saveSalt(saltB64){ localStorage.setItem(STORAGE_SALT, saltB64); }
+function loadSalt(){ return localStorage.getItem(STORAGE_SALT); }
 
-  function openEditor(id){
-    currentId=id;
-    if(id){
-      const n = notes.find(x=>x.id===id); if(!n) return;
-      tTitle.value = n.title || ''; tBody.value = n.body || '';
-      // choose palette
-      document.querySelectorAll('#color-palette button').forEach(b=>b.style.outline=''); [...document.querySelectorAll('#color-palette button')].find(b=>b.style.backgroundColor==rgbFromHex(n.color))?.style.outline='3px solid rgba(0,0,0,0.06)';
-      pinBtn.textContent = n.pinned ? 'Pinned' : 'Pin';
-      reminderInp.value = n.reminder ? new Date(n.reminder).toISOString().slice(0,16) : '';
-    }else{
-      tTitle.value=''; tBody.value=''; document.querySelectorAll('#color-palette button').forEach(b=>b.style.outline=''); palette.children[0].style.outline='3px solid rgba(0,0,0,0.06)';
-      pinBtn.textContent='Pin'; reminderInp.value='';
-    }
-    modal.classList.remove('hidden'); modal.style.display='flex';
-  }
-  closeBtn.addEventListener('click', ()=>{ modal.classList.add('hidden'); modal.style.display='none'; currentId=null; });
+/* ---------- high-level flows ---------- */
+async function initialSetup(password){
+  const salt = generateSalt();
+  saveSalt(salt);
+  const key = await deriveKeyFromPassword(password, salt);
+  // start with empty notes
+  const enc = await encryptNotesWithKey(key, []);
+  saveCipherToStorage(salt, enc.iv, enc.data);
+  masterKey = key; unlocked=true;
+  notes = [];
+  onUnlocked();
+}
 
-  saveBtn.addEventListener('click', ()=>{
-    const colBtn = [...document.querySelectorAll('#color-palette button')].find(b=>b.dataset.chosen==='1') || palette.children[0];
-    const color = hexFromRgb(colBtn.style.backgroundColor || colBtn.style.background);
-    const title = tTitle.value.trim();
-    const body = tBody.value.trim();
-    const tags = extractTags((title+' '+body));
-    const links = extractWikilinks(body);
-    const reminder = reminderInp.value ? new Date(reminderInp.value).getTime() : null;
-    if(currentId){
-      const n = notes.find(x=>x.id===currentId);
-      Object.assign(n, { title, body, color, tags, links, updatedAt:now(), reminder });
-    }else{
-      notes.push({ id:uid(), title, body, color, tags, links, pinned:false, createdAt:now(), updatedAt:now(), reminder });
-    }
-    saveAll(); closeBtn.click();
+async function unlockWithPassword(password){
+  const salt = loadSalt();
+  if(!salt) throw new Error('Sem configuração inicial. Cria uma password primeiro.');
+  const key = await deriveKeyFromPassword(password, salt);
+  const cipher = loadCipherFromStorage();
+  if(!cipher) { masterKey = key; unlocked=true; notes=[]; onUnlocked(); return; }
+  const pt = await decryptNotesWithKey(key, cipher.iv, cipher.data);
+  masterKey = key; unlocked=true; notes = pt || [];
+  onUnlocked();
+}
+
+async function saveNotesEncrypted(){
+  if(!masterKey) throw new Error('Sem chave ativa');
+  const enc = await encryptNotesWithKey(masterKey, notes);
+  // salt already present in storage
+  const salt = loadSalt();
+  saveCipherToStorage(salt, enc.iv, enc.data);
+}
+
+async function changePassword(oldPass, newPass){
+  // derive old key to decrypt, then derive new key and re-encrypt with new salt
+  const saltOld = loadSalt();
+  const keyOld = await deriveKeyFromPassword(oldPass, saltOld);
+  const cipher = loadCipherFromStorage();
+  const pt = cipher ? await decryptNotesWithKey(keyOld, cipher.iv, cipher.data) : [];
+  // now create new salt/key and store
+  const saltNew = generateSalt();
+  saveSalt(saltNew);
+  const keyNew = await deriveKeyFromPassword(newPass, saltNew);
+  const enc = await encryptNotesWithKey(keyNew, pt);
+  saveCipherToStorage(saltNew, enc.iv, enc.data);
+  masterKey = keyNew; notes = pt; unlocked=true; onUnlocked();
+}
+
+/* ---------- export / import ---------- */
+function exportEncryptedBackup(){
+  const cipher = loadCipherFromStorage();
+  if(!cipher) return alert('Sem dados para exportar');
+  const meta = { app:'Meu Universo X', version:'mux-v1' };
+  const out = { meta, payload: cipher };
+  const blob = new Blob([JSON.stringify(out)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'meu_universo_x_backup_muxbak.json'; a.click();
+}
+
+function importEncryptedBackup(file){
+  const fr = new FileReader();
+  fr.onload = (e)=>{
+    try{
+      const parsed = JSON.parse(e.target.result);
+      if(!parsed || !parsed.payload || !parsed.payload.salt) return alert('Backup inválido');
+      // store payload as-is (will require the correct password to decrypt later)
+      localStorage.setItem(STORAGE_CIPHER, JSON.stringify(parsed.payload));
+      localStorage.setItem(STORAGE_SALT, parsed.payload.salt);
+      alert('Backup importado. Agora desbloqueia com a tua password para desencriptar.');
+      location.reload();
+    }catch(err){ alert('Falha ao importar: '+err.message) }
+  };
+  fr.readAsText(file);
+}
+
+/* ---------- locking behavior ---------- */
+function lockNow(){
+  masterKey = null; unlocked=false; notes=[]; clearTimeout(autoLockTimer);
+  document.getElementById('modal-lock').style.display = 'flex';
+  document.getElementById('lock-status').innerText = 'Bloqueado';
+}
+
+function scheduleAutoLock(){
+  clearTimeout(autoLockTimer);
+  const mins = Number(document.getElementById('auto-lock').value) || autoLockMinutes;
+  autoLockTimer = setTimeout(()=>{ lockNow(); alert('Sessão bloqueada por inatividade.'); }, mins*60*1000);
+  document.getElementById('lock-status').innerText = 'Desbloqueado (auto-lock em '+mins+' min)';
+}
+
+/* ---------- UI wiring & note model ---------- */
+function renderGrid(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  notes.slice().reverse().forEach(n=>{
+    const el = document.createElement('div');
+    el.className = 'postit';
+    el.style.background = n.color || '#fff9e6';
+    el.innerHTML = `
+      <div style="padding:10px; width:100%; border-radius:8px">
+        <div style="font-weight:600">${escapeHtml(n.title || 'Sem título')}</div>
+        <div style="margin-top:6px;color:#111;opacity:0.86">${escapeHtml(truncate(n.body || '', 140))}</div>
+        <div style="margin-top:10px;display:flex;gap:6px;justify-content:flex-end">
+          <button class="open" data-id="${n.id}" style="padding:6px;border-radius:6px;border:1px solid rgba(0,0,0,0.06)">Abrir</button>
+        </div>
+      </div>`;
+    el.querySelector('.open').addEventListener('click', ()=> openEditor(n.id));
+    grid.appendChild(el);
   });
+}
 
-  pinBtn.addEventListener('click', ()=>{
-    if(!currentId) return;
-    const n = notes.find(x=>x.id===currentId); if(!n) return;
-    n.pinned = !n.pinned; saveAll(); pinBtn.textContent = n.pinned ? 'Pinned' : 'Pin';
-  });
+/* tiny helpers */
+function escapeHtml(s){ if(!s) return ''; return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+function truncate(s,l){ return s.length>l? s.slice(0,l-1)+'...':s; }
+function uid(){ return 'n_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8) }
 
-  shareBtn.addEventListener('click', ()=>{ if(!currentId) return; const n=notes.find(x=>x.id===currentId); navigatorShareNote(n); });
-  exportTxt.addEventListener('click', ()=>{ if(!currentId) return; const n=notes.find(x=>x.id===currentId); downloadBlob((n.title? n.title + '\n\n':'')+n.body,'text/plain', (n.title||'nota')+'.txt'); });
-  exportMd.addEventListener('click', ()=>{ if(!currentId) return; const n=notes.find(x=>x.id===currentId); downloadBlob((n.title? '# '+n.title +'\n\n':'')+n.body,'text/markdown',(n.title||'nota')+'.md'); });
-
-  function navigatorShareNote(n){
-    if(!n) return;
-    const text = (n.title? n.title + '\n\n':'' ) + n.body;
-    if(navigator.share){ navigator.share({title:n.title,text:n.body}).catch(()=>{}); return; }
-    // fallback: open small window with links
-    const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
-    const mail = `mailto:?subject=${encodeURIComponent(n.title)}&body=${encodeURIComponent(text)}`;
-    const win=window.open('', '_blank'); win.document.body.innerHTML = `<p><a href="${wa}" target="_blank">WhatsApp</a></p><p><a href="${mail}" target="_blank">Email</a></p>`;
+/* Editor flow */
+function openEditor(id){
+  if(!unlocked) return alert('Desbloqueia primeiro');
+  const modal = document.getElementById('modal-editor');
+  modal.style.display='flex';
+  const title = document.getElementById('edit-title');
+  const body = document.getElementById('edit-body');
+  const color = document.getElementById('edit-color');
+  if(id){
+    const n = notes.find(x=>x.id===id);
+    title.value = n.title || '';
+    body.value = n.body || '';
+    color.value = n.color || '#fff1cc';
+    modal.dataset.editId = id;
+  }else{
+    title.value=''; body.value=''; color.value='#fff1cc'; modal.dataset.editId = '';
   }
+}
 
-  function shareByOptions(id){
-    const n = notes.find(x=>x.id===id); if(!n) return;
-    navigatorShareNote(n);
+/* save from editor */
+document.getElementById('save-note').addEventListener('click', async ()=>{
+  const id = document.getElementById('modal-editor').dataset.editId;
+  const t = document.getElementById('edit-title').value.trim();
+  const b = document.getElementById('edit-body').value.trim();
+  const c = document.getElementById('edit-color').value;
+  if(id){
+    const n = notes.find(x=>x.id===id);
+    n.title = t; n.body = b; n.color = c; n.updatedAt = Date.now();
+  }else{
+    notes.push({ id: uid(), title: t, body: b, color: c, createdAt: Date.now(), updatedAt: Date.now() });
   }
-
-  function downloadBlob(content,type,filename){
-    const blob=new Blob([content],{type}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click();
-  }
-
-  function rgbFromHex(hex){
-    if(!hex) return hex;
-    const c=hex.replace('#',''); const r=parseInt(c.slice(0,2),16), g=parseInt(c.slice(2,4),16), b=parseInt(c.slice(4,6),16); return `rgb(${r}, ${g}, ${b})`;
-  }
-  function hexFromRgb(rgb){
-    if(!rgb) return '#fff9e6';
-    const m=rgb.match(/(\d+),\s*(\d+),\s*(\d+)/); if(!m) return rgb;
-    return '#'+[1,2,3].map(i=>Number(m[i]).toString(16).padStart(2,'0')).join('');
-  }
-  function hexFromRgbVar(x){ return hexFromRgb(x) }
-
-  /* ============================
-     BUSCA
-     ============================*/
-  function highlightSearch(q){
-    const cards = grid.children;
-    for(let i=0;i<cards.length;i++){
-      const c=cards[i]; const text=c.innerText.toLowerCase();
-      c.style.opacity = q ? (text.includes(q) ? '1':'0.25') : '1';
-      if(q && q.startsWith('#') && text.includes(q)) c.style.transform='scale(1.02)'; else c.style.transform='';
-    }
-    // graph highlight if visible
-    if(graphReady){
-      nodesMesh.forEach(n=>{
-        const note = notes.find(x=>x.id===n.metaId); if(!note) return;
-        const text = (note.title+' '+note.body+' '+(note.tags||[]).join(' ')).toLowerCase();
-        const match = q ? text.includes(q) : true;
-        n.mesh.material.opacity = match ? 1 : 0.2;
-        n.mesh.scale.lerp(new THREE.Vector3(match?1.8:1,match?1.8:1,match?1.8:1), 0.08);
-      });
-    }
-  }
-
-  /* ============================
-     MARKDOWN PREVIEW (WIKILINKS -> LINKS)
-     ============================*/
-  marked.setOptions({ mangle:false, headerIds:false });
-  window.renderMarkdown = function(md){
-    if(!md) return '';
-    // convert wikilinks [[Title]] into links that open editor
-    const html = marked.parse(md);
-    return html.replace(/\[\[([^\]]+)\]\]/g, (m, p1)=>`<a href="#" class="wikilink" data-target="${p1}">${p1}</a>`);
-  }
-  // delegate click of wikilinks in rendered HTML to open editor if exists or create new
-  document.addEventListener('click', (e)=>{
-    if(e.target.matches('.wikilink')){
-      e.preventDefault();
-      const targetTitle = e.target.dataset.target;
-      const found = notes.find(n=> (n.title||'').toLowerCase()===targetTitle.toLowerCase());
-      if(found) openEditor(found.id);
-      else{
-        // create new note with that title
-        const id = uid();
-        const newNote = { id, title: targetTitle, body:'', color:colors[0], tags:[], links:[], pinned:false, createdAt:now(), updatedAt:now() };
-        notes.push(newNote); saveAll(); openEditor(id);
-      }
-    }
-  });
-
-  /* ============================
-     GRAPH (Three.js)
-     ============================*/
-  let renderer, scene, camera; let graphReady=false; const nodesMesh=[]; const lines=[];
-  initThree();
-  function initThree(){
-    const canvas = document.getElementById('canvas3d');
-    renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
-    renderer.setPixelRatio(window.devicePixelRatio); renderer.setSize(canvas.clientWidth || window.innerWidth, window.innerHeight);
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(60,(canvas.clientWidth||window.innerWidth)/window.innerHeight,0.1,2000); camera.position.set(0,0,140);
-    scene.add(new THREE.AmbientLight(0xffffff,0.8));
-    // particles
-    const g = new THREE.BufferGeometry(); const cnt=600; const arr = new Float32Array(cnt*3);
-    for(let i=0;i<cnt;i++){ arr[i*3+0]=(Math.random()-0.5)*800; arr[i*3+1]=(Math.random()-0.5)*400; arr[i*3+2]=(Math.random()-0.5)*800; }
-    g.setAttribute('position', new THREE.BufferAttribute(arr,3));
-    const pts = new THREE.Points(g, new THREE.PointsMaterial({size:1, color:0x8b5cf6, transparent:true, opacity:0.05}));
-    scene.add(pts);
-
-    // simple pointer orbit
-    let isDown=false, last=[0,0];
-    canvas.addEventListener('pointerdown', e=>{ isDown=true; last=[e.clientX,e.clientY]; canvas.style.cursor='grabbing'; });
-    window.addEventListener('pointerup', ()=>{ isDown=false; canvas.style.cursor='grab'; });
-    canvas.addEventListener('pointermove', e=>{ if(!isDown) return; const dx=(e.clientX-last[0])/200; const dy=(e.clientY-last[1])/200; scene.rotation.y += dx; scene.rotation.x += dy; last=[e.clientX,e.clientY]; });
-
-    canvas.addEventListener('wheel', e=>{ e.preventDefault(); camera.position.z += e.deltaY*0.02; camera.position.z = Math.max(40, Math.min(1200, camera.position.z)); }, {passive:false});
-
-    // raycast on click
-    const ray = new THREE.Raycaster(); const mouse = new THREE.Vector2();
-    canvas.addEventListener('click', ev=>{ const rect=canvas.getBoundingClientRect(); mouse.x = ((ev.clientX-rect.left)/rect.width)*2-1; mouse.y = -((ev.clientY-rect.top)/rect.height)*2+1; ray.setFromCamera(mouse,camera); const ints = ray.intersectObjects(nodesMesh.map(x=>x.mesh)); if(ints.length){ const id = ints[0].object.userData.metaId; openEditor(id); } });
-
-    window.addEventListener('resize', ()=>{ renderer.setSize(canvas.clientWidth||window.innerWidth, window.innerHeight); camera.aspect=(canvas.clientWidth||window.innerWidth)/window.innerHeight; camera.updateProjectionMatrix(); });
-
-    (function animate(){ requestAnimationFrame(animate);
-      nodesMesh.forEach(n=>{
-        n.mesh.position.x += (n.target.x - n.mesh.position.x)*0.04;
-        n.mesh.position.y += (n.target.y - n.mesh.position.y)*0.04;
-        n.mesh.position.z += (n.target.z - n.mesh.position.z)*0.04;
-        n.mesh.scale.lerp(new THREE.Vector3(n.scaleTarget||1,n.scaleTarget||1,n.scaleTarget||1),0.06);
-      });
-      lines.forEach(l=>{
-        const p = l.geometry.attributes.position.array;
-        p[0]=l.a.mesh.position.x; p[1]=l.a.mesh.position.y; p[2]=l.a.mesh.position.z;
-        p[3]=l.b.mesh.position.x; p[4]=l.b.mesh.position.y; p[5]=l.b.mesh.position.z;
-        l.geometry.attributes.position.needsUpdate=true;
-      });
-      renderer.render(scene,camera);
-    })();
-
-    graphReady=true; rebuildGraph();
-  }
-
-  function clearGraph(){ nodesMesh.forEach(n=>scene.remove(n.mesh)); lines.forEach(l=>scene.remove(l)); nodesMesh.length=0; lines.length=0; }
-
-  function rebuildGraph(){
-    if(!graphReady) return; clearGraph();
-    const radius=5; const spread=70;
-    notes.forEach((n,i)=>{
-      const geo = new THREE.SphereGeometry(radius, 24, 24);
-      const mat = new THREE.MeshStandardMaterial({color:hexToNum(n.color||colors[0]), roughness:0.7, metalness:0.05, transparent:true, opacity:1});
-      const m = new THREE.Mesh(geo,mat); const pos={x:(Math.random()-0.5)*spread + (i%5)*6, y:(Math.random()-0.5)*spread, z:(Math.random()-0.5)*spread};
-      m.position.set(pos.x,pos.y,pos.z); m.userData.metaId = n.id; scene.add(m);
-      nodesMesh.push({mesh:m,metaId:n.id,target:pos,scaleTarget:1});
-    });
-    // connections: tags and wikilinks
-    const map = {};
-    notes.forEach(n=>{ (n.tags||[]).forEach(t=>{ map[t]=map[t]||[]; map[t].push(n.id) }); (n.links||[]).forEach(L=>{ map['__wikilink__'+L]=map['__wikilink__'+L]||[]; map['__wikilink__'+L].push(n.id) }) });
-    const linked = new Set();
-    Object.values(map).forEach(arr=>{
-      for(let i=0;i<arr.length;i++) for(let j=i+1;j<arr.length;j++){
-        const a=arr[i], b=arr[j]; const key=[a,b].sort().join('::'); if(linked.has(key)) continue; linked.add(key);
-        const A = nodesMesh.find(x=>x.metaId===a), B = nodesMesh.find(x=>x.metaId===b); if(!A||!B) continue;
-        const geom = new THREE.BufferGeometry(); const posArr = new Float32Array(6); geom.setAttribute('position', new THREE.BufferAttribute(posArr,3));
-        const mat = new THREE.LineBasicMaterial({color:0x8b5cf6, transparent:true, opacity:0.28});
-        const line = new THREE.Line(geom, mat); line.a=A; line.b=B; line.geometry=geom; scene.add(line); lines.push(line);
-      }
-    });
-  }
-
-  function hexToNum(hex){ return parseInt((hex||'#ffffff').replace('#',''),16) }
-
-  /* ============================
-     BOOTSTRAP & DEMO NOTE
-     ============================*/
-  loadAll();
-  if(notes.length===0){
-    notes.push({
-      id:uid(), title:'Ideias iniciais', body:'Bem-vindo ao Meu Universo X! Use #exemplo e [[Nova Nota]] para testar ligações.', color:colors[0], tags:['#exemplo'], links:['Nova Nota'], pinned:true, createdAt:now(), updatedAt:now()
-    });
-    saveAll();
-  } else { renderGrid(); rebuildGraph(); }
-
+  await saveNotesEncrypted();
+  document.getElementById('modal-editor').style.display='none';
   renderGrid();
+  scheduleAutoLock();
+});
 
-  // periodic small motion
-  setInterval(()=>{ nodesMesh.forEach(n=>{ n.target.x += (Math.random()-0.5)*6; n.target.y += (Math.random()-0.5)*4; n.target.z += (Math.random()-0.5)*6; }); }, 2400);
+/* new note */
+document.getElementById('btn-new').addEventListener('click', ()=> openEditor(null));
+document.getElementById('close-editor').addEventListener('click', ()=> document.getElementById('modal-editor').style.display='none');
 
-  // reminders simple checker
-  setInterval(()=>{
-    const nowTs = Date.now();
-    notes.forEach(n=>{ if(n.reminder && n.reminder <= nowTs && !n._remNotified){ alert('Lembrete: '+(n.title||'Sem título')); n._remNotified=true; } });
-  }, 60000);
+/* delete note */
+document.getElementById('del-note').addEventListener('click', async ()=>{
+  const id = document.getElementById('modal-editor').dataset.editId;
+  if(!id) return alert('Nota não guardada ainda');
+  if(!confirm('Confirmar exclusão?')) return;
+  notes = notes.filter(x=>x.id!==id);
+  await saveNotesEncrypted();
+  document.getElementById('modal-editor').style.display='none';
+  renderGrid();
+});
 
-  // small utilities exposed
-  window.MUX = { notes, saveAll, loadAll, rebuildGraph, renderGrid };
+/* unlock modal wiring */
+document.getElementById('unlock-btn').addEventListener('click', async ()=>{
+  const pass = document.getElementById('master-pass').value;
+  if(!pass) return alert('Insere a password');
+  try{
+    await unlockWithPassword(pass);
+  }catch(err){ alert(err.message); return; }
+  document.getElementById('modal-lock').style.display='none';
+});
 
-  // helper: open by title (used by wikilinks code)
-  window.openNoteByTitle = function(title){ const f = notes.find(x=> (x.title||'').toLowerCase()===title.toLowerCase()); if(f) openEditor(f.id); else { const id=uid(); notes.push({id,title,body:'',color:colors[0],tags:[],links:[],createdAt:now(),updatedAt:now()}); saveAll(); openEditor(id); } };
+/* first setup */
+document.getElementById('setup-btn').addEventListener('click', async ()=>{
+  const p1 = document.getElementById('new-pass').value;
+  const p2 = document.getElementById('new-pass-confirm').value;
+  if(!p1 || p1.length < 8) return alert('Password mínima: 8 caracteres');
+  if(p1 !== p2) return alert('Passwords não coincidem');
+  await initialSetup(p1);
+  document.getElementById('modal-lock').style.display='none';
+});
 
-  // keyboard: Ctrl/Cmd+N create new
-  window.addEventListener('keydown', (e)=>{ if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='n'){ e.preventDefault(); openEditor(null); } });
+/* lock button */
+document.getElementById('btn-lock').addEventListener('click', ()=> lockNow());
 
-  </script>
+/* change password UI */
+document.getElementById('btn-change-pass').addEventListener('click', async ()=>{
+  if(!unlocked) return alert('Desbloqueia primeiro');
+  const oldP = prompt('Password actual:');
+  if(!oldP) return;
+  const newP = prompt('Nova password (mín 8 chars):');
+  if(!newP || newP.length<8) return alert('Password inválida');
+  try{
+    await changePassword(oldP, newP);
+    alert('Password alterada com sucesso.');
+    scheduleAutoLock();
+  }catch(err){ alert('Não foi possível mudar password: '+err.message) }
+});
+
+/* export/import */
+document.getElementById('btn-export').addEventListener('click', ()=> exportEncryptedBackup());
+document.getElementById('btn-import').addEventListener('click', ()=>{
+  const f = document.createElement('input'); f.type='file'; f.accept='application/json';
+  f.onchange = e => { if(e.target.files[0]) importEncryptedBackup(e.target.files[0]); };
+  f.click();
+});
+
+/* search */
+document.getElementById('search').addEventListener('input', (e)=>{
+  const q = e.target.value.trim().toLowerCase();
+  const cards = document.querySelectorAll('#grid > div');
+  cards.forEach(card=>{
+    card.style.display = !q ? 'block' : (card.innerText.toLowerCase().includes(q) ? 'block' : 'none');
+  });
+});
+
+/* auto-lock config */
+document.getElementById('auto-lock').addEventListener('change', ()=> scheduleAutoLock());
+
+/* activity resets auto-lock */
+['mousemove','keydown','click','touchstart'].forEach(ev=>{
+  window.addEventListener(ev, ()=> { lastActivity = Date.now(); if(unlocked) scheduleAutoLock(); });
+});
+
+/* ---------- boot sequence ---------- */
+(async function boot(){
+  // if no salt present => first time
+  const salt = localStorage.getItem(STORAGE_SALT);
+  if(!salt){
+    document.getElementById('first-setup').style.display='block';
+    document.getElementById('login-area').style.display='none';
+    document.getElementById('lock-status').innerText='Configuração inicial';
+    return;
+  }else{
+    // show login area
+    document.getElementById('first-setup').style.display='none';
+    document.getElementById('login-area').style.display='block';
+    document.getElementById('master-pass').focus();
+  }
+})();
+
+/* ---------- after unlock UI updates ---------- */
+function onUnlocked(){
+  document.getElementById('lock-status').innerText='Desbloqueado';
+  document.getElementById('modal-lock').style.display='none';
+  renderGrid();
+  scheduleAutoLock();
+}
+
+/* ---------- small 3D graph (visual only) ---------- */
+(function initThree(){
+  const canvas = document.getElementById('canvas3d');
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+  renderer.setSize(canvas.clientWidth || canvas.width, 360);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, (canvas.clientWidth||600)/360, 0.1, 2000); camera.position.set(0,0,120);
+  scene.add(new THREE.AmbientLight(0xffffff,0.9));
+  const geo = new THREE.BufferGeometry();
+  const pts = 200; const arr = new Float32Array(pts*3);
+  for(let i=0;i<pts;i++){ arr[i*3]= (Math.random()-0.5)*200; arr[i*3+1]=(Math.random()-0.5)*80; arr[i*3+2]=(Math.random()-0.5)*200; }
+  geo.setAttribute('position', new THREE.BufferAttribute(arr,3));
+  const points = new THREE.Points(geo, new THREE.PointsMaterial({size:1.8,color:0x8b5cf6,opacity:0.06,transparent:true}));
+  scene.add(points);
+  (function anim(){ requestAnimationFrame(anim); points.rotation.y += 0.0008; renderer.render(scene,camera); })();
+})();
+
+/* ---------- small utility: load decrypted from storage if unlocked already (edge case) ---------- */
+(async function tryAutoUnlockIfSessionActive(){
+  // If user used site earlier in same tab and key exists in memory, do nothing.
+  // Otherwise, we wait user to provide password.
+})();
+
+</script>
 </body>
 </html>

@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Meu Universo X — Shinobi Tech PRO</title>
-
+<title>Meu Universo X — Shinobi Tech Ultimate</title>
 <style>
 :root{
   --bg:#071022;
@@ -12,124 +11,175 @@
   --accent:#00d4ff;
   --muted:rgba(255,255,255,0.08);
   --danger:#ff6b6b;
-  --glass:rgba(255,255,255,0.03);
+  --paper1:#f6ead0;
+  --paper2:#e7d4a2;
+  --sealA:#de3b3b;
+  --sealB:#7e0000;
 }
 
-/* Reset */
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;background:var(--bg);color:#fff;font-family:Inter,Arial,system-ui;overflow:hidden}
+/* reset */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:#fff;font-family:Inter,Arial,system-ui;overflow:hidden;-webkit-font-smoothing:antialiased}
 
-/* --------------------------------------------------------------------- */
-/* ◎ PERGAMINHO NARUTO PRO — CINEMÁTICO                                 */
-/* --------------------------------------------------------------------- */
-
+/* ======================
+   PERGAMINHO — VISUAL MELHORADO
+   ====================== */
 #scroll-screen{
-  position:fixed;inset:0;
-  display:flex;justify-content:center;align-items:center;
-  background:radial-gradient(circle at 30% 20%, #062033 0%, #030612 65%);
-  z-index:99999;overflow:hidden;
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 25% 30%, #0a2030 0%, #02040a 70%);
+  z-index:99999;pointer-events:none;opacity:0;transition:opacity .3s;
 }
 
-/* queda inicial */
+/* shell that drops then unrolls */
 .scroll-core{
-  width:92%;max-width:820px;
-  transform-origin:top;
-  opacity:0;
-  animation:dropIn .9s ease-out forwards;
-}
-@keyframes dropIn{
-  0%{transform:translateY(-260px) scaleY(.3);opacity:0}
-  60%{opacity:1}
-  100%{transform:translateY(0) scaleY(1)}
+  width:92%;max-width:920px;transform-origin:top;opacity:0;
+  will-change:transform,opacity;
 }
 
-/* extremidades de madeira */
-.scroll-top,.scroll-bottom{
-  height:56px;
-  background:linear-gradient(90deg,#5c3412,#b5783f,#5c3412);
-  border-radius:36px;
-  box-shadow:0 16px 50px rgba(0,0,0,.6);
+/* wooden rods */
+.scroll-top, .scroll-bottom{
+  height:62px;border-radius:40px;
+  background:linear-gradient(90deg,#5e3610,#b57a3d,#5e3610);
+  box-shadow:0 20px 60px rgba(0,0,0,.55);
 }
 
-/* corpo do pergaminho */
+/* paper body with procedural texture (no images) */
 .scroll-body{
-  background:linear-gradient(180deg,#f6e9cf,#e8d5aa);
-  box-shadow:inset 0 0 80px rgba(0,0,0,.18);
-  padding:96px 48px;min-height:360px;
+  min-height:380px;padding:110px 56px;
+  background:linear-gradient(180deg,var(--paper1),var(--paper2));
+  position:relative;overflow:hidden;border-radius:6px;
+  box-shadow:inset 0 0 90px rgba(20,10,0,0.08);
   transform-origin:top;transform:scaleY(0);
-  animation:unroll 2.4s cubic-bezier(.15,.95,.25,1.15) .3s forwards;
-}
-@keyframes unroll{
-  0%{transform:scaleY(0)}
-  50%{transform:scaleY(1.2)}
-  100%{transform:scaleY(1)}
+  /* subtle paper noise via layered gradients */
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(0,0,0,0.02) 0 2px, transparent 3px),
+    radial-gradient(circle at 70% 40%, rgba(0,0,0,0.015) 0 3px, transparent 4px),
+    linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 40%);
 }
 
-/* fumaça chakra sem ficheiros externos */
-.scroll-smoke{
-  position:absolute;left:50%;top:50%;
-  width:900px;height:520px;pointer-events:none;
-  transform:translate(-50%,-50%) scale(.5);
-  opacity:0;mix-blend-mode:screen;
+/* Unroll animation */
+@keyframes unroll {
+  0% { transform:scaleY(0); }
+  60% { transform:scaleY(1.12); }
+  100% { transform:scaleY(1); }
+}
+
+/* smoke container (CSS + SVG filter) */
+.scroll-smoke {
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.6);
+  width:1000px;height:580px;pointer-events:none;opacity:0;mix-blend-mode:screen;
+  filter:blur(10px) url(#goo);
+}
+
+/* smoke particle layers (will animate via JS adding/removing classes) */
+.smoke-layer {
+  position:absolute;left:0;top:0;width:100%;height:100%;
   background:
-    radial-gradient(circle at 20% 20%, rgba(0,200,255,0.15) 0%, transparent 45%),
-    radial-gradient(circle at 80% 30%, rgba(0,200,255,0.12) 0%, transparent 40%),
-    radial-gradient(circle at 50% 70%, rgba(255,255,255,0.06) 0%, transparent 50%);
-  filter:blur(12px) url(#goo);
-  animation:smokeIn 2.2s ease-out 1.4s forwards;
+    radial-gradient(circle at 20% 25%, rgba(0,200,255,0.12) 0%, transparent 18%),
+    radial-gradient(circle at 80% 35%, rgba(0,200,255,0.10) 0%, transparent 16%),
+    radial-gradient(circle at 45% 70%, rgba(255,255,255,0.05) 0%, transparent 28%);
+  opacity:0;transform:scale(.6);
 }
-@keyframes smokeIn{
-  0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}
-  40%{opacity:.8}
-  100%{opacity:0;transform:translate(-50%,-50%) scale(1.2)}
-}
+.smoke-layer.show { animation: smokeExpand 2.4s ease-out forwards; }
+@keyframes smokeExpand { 0%{opacity:0;transform:scale(.6)} 50%{opacity:.9} 100%{opacity:0;transform:scale(1.25)} }
 
-/* selo */
+/* chakra rim: glowing border around paper */
+.chakra-rim {
+  position:absolute;inset:0;border-radius:6px;pointer-events:none;
+  box-shadow:0 0 40px 6px rgba(0,212,255,0);transition:box-shadow .5s;
+}
+.chakra-rim.pulse { box-shadow:0 0 60px 12px rgba(0,200,255,0.18); }
+
+/* SEAL */
 .scroll-seal{
-  width:128px;height:128px;margin:0 auto 22px;
-  display:flex;justify-content:center;align-items:center;
-  border-radius:50%;
-  background:radial-gradient(circle,#de3b3b,#7e0000);
-  box-shadow:0 14px 40px rgba(217,59,59,.28);
-  opacity:0;transform:scale(.3);
-  animation:sealPop .7s cubic-bezier(.2,1.4,.3,1) 2.3s forwards;
+  width:140px;height:140px;border-radius:50%;margin:0 auto 18px;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle, var(--sealA) 0%, var(--sealB) 100%);
+  box-shadow:0 18px 50px rgba(217,59,59,.28), 0 0 40px rgba(255,80,80,0.06) inset;
+  transform:scale(.2) rotate(-6deg);opacity:0;
 }
-@keyframes sealPop{
-  0%{opacity:0;transform:scale(.3)}
-  70%{opacity:1;transform:scale(1.25)}
-  100%{transform:scale(1)}
+@keyframes sealPop {
+  0%{opacity:0;transform:scale(.2) rotate(-6deg)}
+  65%{opacity:1;transform:scale(1.18) rotate(4deg)}
+  100%{transform:scale(1) rotate(0)}
 }
+.scroll-seal.pop { animation:sealPop .7s cubic-bezier(.2,1.4,.3,1) forwards; }
 
-/* caractere */
-.scroll-seal-char{
-  font-size:52px;color:#fff;font-weight:900;
-  text-shadow:0 5px 15px rgba(0,0,0,.6)
-}
+/* SEAL inner char */
+.scroll-seal-char{font-size:56px;color:#fff;font-weight:900;text-shadow:0 6px 14px rgba(0,0,0,.6)}
 
-/* título */
+/* TITLE */
 .scroll-title{
-  text-align:center;font-size:50px;font-family:Georgia,serif;color:#7a4317;
-  opacity:0;transform:translateY(28px);
-  animation:titleIn 1.3s ease-out 2.9s forwards;
+  text-align:center;font-family:Georgia,serif;font-weight:700;
+  font-size:54px;color:#7a4317;opacity:0;transform:translateY(30px);
 }
-@keyframes titleIn{
-  0%{opacity:0;transform:translateY(28px)}
-  100%{opacity:1;transform:translateY(0)}
-}
+.scroll-title.show { animation:titleShow 1.2s cubic-bezier(.2,.9,.3,1) forwards; }
+@keyframes titleShow { 0%{opacity:0;transform:translateY(30px)} 100%{opacity:1;transform:translateY(0)} }
 
-/* desaparecer  */
-.fade-out-scroll{
-  animation:scrollClose 2.5s ease forwards;
+/* wind ripple across paper */
+.paper-wind {
+  position:absolute;left:-30%;top:0;width:160%;height:100%;pointer-events:none;
+  background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.00) 40%, rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.01));
+  transform:translateX(-100%);opacity:0;
 }
-@keyframes scrollClose{
+.paper-wind.go { animation:windSweep 1.6s ease-out .9s forwards; }
+@keyframes windSweep { 0%{transform:translateX(-100%);opacity:0} 20%{opacity:.9} 100%{transform:translateX(100%);opacity:0} }
+
+/* close animation */
+@keyframes closeScroll {
   0%{opacity:1;transform:translateY(0) scale(1)}
-  80%{opacity:0.2;transform:translateY(-100px) scale(.7)}
+  70%{opacity:0.25;transform:translateY(-80px) scale(.8)}
   100%{opacity:0;transform:translateY(-160px) scale(.5)}
 }
+.scroll-close { animation: closeScroll 2.2s ease forwards; }
 
-/* filtro goo */
+/* enforce scroll visible */
+.visible-force { opacity:1 !important; pointer-events:auto; }
+
+/* ======================================
+   APP base (login, app, notes)
+   ====================================== */
+#login-screen{display:none;height:100vh;align-items:center;justify-content:center;padding:20px}
+.login-card{
+  width:100%;max-width:520px;padding:28px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.03);backdrop-filter:blur(6px);box-shadow:0 30px 90px rgba(0,0,0,.6);text-align:center;
+}
+.input{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#fff;margin:10px 0;outline:none}
+.btn{width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),#0099cc);color:#021;cursor:pointer;font-weight:700}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 12px;border-radius:8px;color:#fff;cursor:pointer}
+.err{color:var(--danger);display:none;margin-top:8px}
+
+#app{display:none;height:100vh;overflow:hidden}
+.topbar{height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:linear-gradient(90deg,rgba(0,0,0,0.12),transparent);border-bottom:1px solid rgba(255,255,255,0.02)}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:48px;height:48;border-radius:10px;background:linear-gradient(135deg,#021428,#002b42);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--accent);box-shadow:0 8px 28px rgba(0,212,255,0.05)}
+.apptitle{font-size:18px;color:var(--accent);font-weight:700}
+.top-actions{display:flex;gap:10px;align-items:center}
+.search{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#fff}
+
+/* layout */
+.container{display:flex;height:calc(100vh - 72px);overflow:hidden}
+.sidebar{width:280px;padding:22px;background:linear-gradient(180deg,rgba(0,0,0,0.08),transparent);border-right:1px solid rgba(255,255,255,0.02)}
+.side-title{font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.menu-item{padding:10px 12px;border-radius:8px;color:rgba(255,255,255,.85);cursor:pointer;margin-bottom:8px}
+.menu-item.active{background:linear-gradient(90deg,rgba(0,212,255,0.06),transparent);color:var(--accent);font-weight:700}
+.main{flex:1;padding:22px;overflow:auto;background:linear-gradient(180deg,#071026 0%, #041122 100%)}
+.controls{display:flex;gap:12px;align-items:center;margin-bottom:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.note{background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02));padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;min-height:110px;display:flex;flex-direction:column;gap:8px}
+.note h4{margin:0;font-size:15px;color:var(--accent)}
+.note p{margin:0;color:rgba(255,255,255,.78);font-size:13px;white-space:pre-wrap;flex:1}
+.note .meta{display:flex;justify-content:space-between;color:rgba(255,255,255,.45);font-size:12px}
+.fab{position:fixed;right:28px;bottom:28px;width:64px;height:64px;border-radius:50%;background:linear-gradient(90deg,var(--accent),#0099cc);display:flex;align-items:center;justify-content:center;font-weight:800;color:#021;box-shadow:0 18px 60px rgba(0,212,255,0.12);cursor:pointer}
+
+/* modal */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(0,0,0,0.6),rgba(0,0,0,0.6));z-index:1200}
+.modal-card{width:100%;max-width:760px;background:linear-gradient(180deg,#071026,#081430);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+
+@media(max-width:860px){ .sidebar{display:none} .grid{grid-template-columns:1fr} }
 </style>
 
+<!-- SVG goo filter for smoke -->
 <svg width="0" height="0" style="position:absolute">
   <filter id="goo">
     <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
@@ -137,60 +187,69 @@ html,body{height:100%;background:var(--bg);color:#fff;font-family:Inter,Arial,sy
       values="1 0 0 0 0
               0 1 0 0 0
               0 0 1 0 0
-              0 0 0 18 -7"
-      result="goo"/>
+              0 0 0 18 -8" result="goo" />
     <feBlend in="SourceGraphic" in2="goo"/>
   </filter>
 </svg>
+
 </head>
 <body>
 
-<!-- ========== PERGAMINHO ========== -->
-<div id="scroll-screen">
-  <div class="scroll-smoke"></div>
-  <div class="scroll-core">
+<!-- ================= PERGAMINHO ================= -->
+<div id="scroll-screen" class="visible-force" aria-hidden="true">
+  <div class="scroll-core" id="scrollCore" aria-hidden="true">
     <div class="scroll-top"></div>
-      <div class="scroll-body">
-        <div class="scroll-seal"><div class="scroll-seal-char">封</div></div>
-        <div class="scroll-title">MEU UNIVERSO X</div>
+
+    <div class="scroll-body">
+      <div class="paper-wind" id="paperWind"></div>
+      <div class="chakra-rim" id="chakraRim"></div>
+
+      <div class="scroll-seal" id="seal">
+        <div class="scroll-seal-char">封</div>
       </div>
+
+      <div class="scroll-title" id="scrollTitle">MEU UNIVERSO X</div>
+
+      <div class="scroll-smoke" id="smoke">
+        <div class="smoke-layer" id="smokeLayer1"></div>
+        <div class="smoke-layer" id="smokeLayer2"></div>
+      </div>
+
+    </div>
+
     <div class="scroll-bottom"></div>
   </div>
 </div>
 
-<!-- ========== LOGIN ========== -->
-<div id="login-screen" style="display:none">
+<!-- ================= LOGIN ================= -->
+<div id="login-screen">
   <div class="login-card">
     <h2>🔒 Meu Universo X</h2>
-    <p id="login-sub" class="small">Insere a senha para entrar.</p>
+    <p id="login-sub" class="small">Insere a senha para entrar — ou define uma nova senha.</p>
 
-    <input id="pwd" class="input" type="password" placeholder="Senha" />
+    <input id="pwd" class="input" type="password" placeholder="Senha" autocomplete="off" />
     <button id="btnLogin" class="btn">Entrar</button>
 
     <div style="display:flex;gap:8px;margin-top:12px;justify-content:center">
-      <button id="btnSetPwd" class="btn-ghost">Alterar Senha</button>
-      <button id="btnForgot" class="btn-ghost">Apagar Dados</button>
+      <button id="btnSetPwd" class="btn-ghost">Definir / Alterar senha</button>
+      <button id="btnForgot" class="btn-ghost">Esqueci / Apagar dados</button>
     </div>
 
-    <div id="errLogin" class="err" style="display:none">Senha incorreta</div>
+    <div id="errLogin" class="err">Senha incorreta</div>
   </div>
 </div>
 
-<!-- ========== APP INTERFACE ========== -->
-<div id="app" style="display:none">
+<!-- ================= APP ================= -->
+<div id="app">
   <div class="topbar">
     <div class="brand">
       <div class="logo">MX</div>
-      <div>
-        <div class="apptitle">Meu Universo X</div>
-        <div class="small" style="opacity:.6">Shinobi Tech</div>
-      </div>
+      <div><div class="apptitle">Meu Universo X</div><div class="small">Shinobi Tech • Notas</div></div>
     </div>
-
     <div class="top-actions">
-      <input id="search" class="search" placeholder="Pesquisar..." />
+      <input id="search" class="search" placeholder="Procurar notas..." />
       <button id="openSettings" class="btn-ghost">⚙️</button>
-      <button id="logoutBtn" class="btn-ghost">🚪</button>
+      <button id="logoutBtn" class="btn-ghost">🚪 Sair</button>
     </div>
   </div>
 
@@ -203,7 +262,7 @@ html,body{height:100%;background:var(--bg);color:#fff;font-family:Inter,Arial,sy
 
       <div style="height:20px"></div>
       <div class="side-title">Partilha</div>
-      <div class="small" style="opacity:.7">WhatsApp • Telegram • X • Email • Copiar</div>
+      <div class="small" style="opacity:.8">WhatsApp • Telegram • X • Email • Copiar</div>
     </aside>
 
     <main class="main">
@@ -218,22 +277,22 @@ html,body{height:100%;background:var(--bg);color:#fff;font-family:Inter,Arial,sy
 
   <div id="fab" class="fab">+</div>
 </div>
-<!-- ========== MODAL EDITOR ========== -->
-<div id="modal" class="modal" style="display:none">
+<!-- MODAL: Editor -->
+<div id="modal" class="modal">
   <div class="modal-card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <strong>Editor de Nota</strong>
       <button id="closeModal" class="btn-ghost">Fechar</button>
     </div>
 
-    <input id="noteTitle" class="input" placeholder="Título">
-    <textarea id="noteContent" class="input mono" style="min-height:150px" placeholder="Conteúdo..."></textarea>
+    <input id="noteTitle" class="input" placeholder="Título da nota" />
+    <textarea id="noteContent" class="input" style="min-height:150px" placeholder="Escreve a nota..."></textarea>
 
-    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center">
       <button id="saveNote" class="btn">Salvar</button>
-      <button id="toggleFav" class="btn-ghost">⭐</button>
-      <button id="archiveNote" class="btn-ghost">📦</button>
-      <button id="delNote" class="btn-ghost" style="color:#ff6b6b">🗑️</button>
+      <button id="toggleFav" class="btn-ghost">⭐ Favorita</button>
+      <button id="archiveNote" class="btn-ghost">📦 Arquivar</button>
+      <button id="delNote" class="btn-ghost" style="color:var(--danger)">Apagar</button>
 
       <div style="flex:1"></div>
 
@@ -246,342 +305,341 @@ html,body{height:100%;background:var(--bg);color:#fff;font-family:Inter,Arial,sy
   </div>
 </div>
 
-<!-- ========== CONFIGURAÇÕES ========== -->
-<div id="modal-settings" class="modal" style="display:none">
+<!-- MODAL: Settings -->
+<div id="modal-settings" class="modal">
   <div class="modal-card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <strong>Configurações</strong>
+      <strong>Configurações & Backup</strong>
       <button id="closeSettings" class="btn-ghost">Fechar</button>
     </div>
 
-    <div class="small">Alterar senha</div>
+    <div class="small">Definir / Alterar senha</div>
     <input id="newPwd" class="input" type="password" placeholder="Nova senha" />
-    <input id="newPwdConfirm" class="input" type="password" placeholder="Confirmar senha" />
+    <input id="newPwdConfirm" class="input" type="password" placeholder="Confirmar nova senha" />
     <div style="display:flex;gap:8px;margin-top:8px">
       <button id="savePwd" class="btn">Salvar senha</button>
-      <button id="clearAll" class="btn-ghost" style="color:#ff6b6b">Apagar tudo</button>
-      <div id="pwdMsg" class="small" style="margin-left:auto"></div>
+      <button id="clearAll" class="btn-ghost" style="color:var(--danger)">Apagar tudo</button>
+      <div style="flex:1"></div>
+      <div id="pwdMsg" class="small"></div>
     </div>
 
-    <hr style="margin:14px 0;border:0;border-top:1px solid rgba(255,255,255,.06)">
+    <hr style="margin:14px 0;border:0;border-top:1px solid rgba(255,255,255,.04)">
 
-    <div style="display:flex;gap:8px">
-      <button id="exportData" class="btn-ghost">Exportar</button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button id="exportData" class="btn-ghost">Exportar JSON</button>
       <label class="btn-ghost" style="cursor:pointer">Importar
-        <input id="importFile" type="file" accept="application/json" style="display:none">
+        <input id="importFile" type="file" accept="application/json" style="display:none" />
       </label>
-      <div id="importMsg" class="small" style="margin-left:auto"></div>
+      <div style="flex:1"></div>
+      <div id="importMsg" class="small"></div>
     </div>
   </div>
 </div>
 
-<!-- ========== JAVASCRIPT ========== -->
 <script>
-/* ------------------------------------------------ */
-/* ● ESTADO E LOCALSTORAGE                          */
-/* ------------------------------------------------ */
-const LS_KEY = "mx_universo_v3";
+/* ------------------------------------------------
+   Estado e utilitários
+   ------------------------------------------------ */
+const LS_KEY = 'mx_universo_pro_v4';
+function loadState(){ try{const r=localStorage.getItem(LS_KEY); if(!r) return {password:null,notes:[]}; const p=JSON.parse(r); if(!Array.isArray(p.notes)) p.notes=[]; return p;}catch(e){return {password:null,notes:[]}} }
+function saveState(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
 let state = loadState();
-function loadState(){
-  try{
-    const raw = localStorage.getItem(LS_KEY);
-    if(!raw) return {password:null,notes:[]};
-    const data = JSON.parse(raw);
-    if(!Array.isArray(data.notes)) data.notes = [];
-    return data;
-  }catch(e){return {password:null,notes:[]}}
-}
-function saveState(){localStorage.setItem(LS_KEY, JSON.stringify(state))}
 
-/* ------------------------------------------------ */
-/* ● ELEMENTOS                                      */
-/* ------------------------------------------------ */
+/* refs */
 const $ = id => document.getElementById(id);
 const refs = {
-  scroll: $("scroll-screen"),
-  core: document.querySelector(".scroll-core"),
-  smoke: document.querySelector(".scroll-smoke"),
-  login: $("login-screen"),
-  app: $("app"),
-  pwd: $("pwd"),
-  btnLogin: $("btnLogin"),
-  btnSetPwd: $("btnSetPwd"),
-  btnForgot: $("btnForgot"),
-  errLogin: $("errLogin"),
-  loginSub: $("login-sub"),
-  newNote: $("newNote"),
-  fab: $("fab"),
-  grid: $("grid"),
-  count: $("count"),
-  search: $("search"),
-  modal: $("modal"),
-  modalSettings: $("modal-settings"),
-  closeModal: $("closeModal"),
-  closeSettings: $("closeSettings"),
-  saveNote: $("saveNote"),
-  noteTitle: $("noteTitle"),
-  noteContent: $("noteContent"),
-  delNote: $("delNote"),
-  toggleFav: $("toggleFav"),
-  archiveNote: $("archiveNote"),
-  newPwd: $("newPwd"),
-  newPwdConfirm: $("newPwdConfirm"),
-  savePwd: $("savePwd"),
-  pwdMsg: $("pwdMsg"),
-  clearAll: $("clearAll"),
-  exportData: $("exportData"),
-  importFile: $("importFile"),
-  importMsg: $("importMsg"),
-  shareWhatsapp: $("shareWhatsapp"),
-  shareTelegram: $("shareTelegram"),
-  shareX: $("shareX"),
-  shareEmail: $("shareEmail"),
-  copyText: $("copyText"),
-  openSettings: $("openSettings"),
-  logoutBtn: $("logoutBtn"),
+  scrollScreen: $('scroll-screen'),
+  scrollCore: $('scrollCore'),
+  smoke: $('smoke'),
+  smokeLayer1: $('smokeLayer1'),
+  smokeLayer2: $('smokeLayer2'),
+  paperWind: $('paperWind'),
+  chakraRim: $('chakraRim'),
+  seal: $('seal'),
+  scrollTitle: $('scrollTitle'),
+  loginScreen: $('login-screen'),
+  app: $('app'),
+  pwd: $('pwd'),
+  btnLogin: $('btnLogin'),
+  btnSetPwd: $('btnSetPwd'),
+  btnForgot: $('btnForgot'),
+  errLogin: $('errLogin'),
+  loginSub: $('login-sub'),
+  newNote: $('newNote'),
+  fab: $('fab'),
+  grid: $('grid'),
+  count: $('count'),
+  search: $('search'),
+  modal: $('modal'),
+  closeModal: $('closeModal'),
+  saveNote: $('saveNote'),
+  noteTitle: $('noteTitle'),
+  noteContent: $('noteContent'),
+  delNote: $('delNote'),
+  toggleFav: $('toggleFav'),
+  archiveNote: $('archiveNote'),
+  modalSettings: $('modal-settings'),
+  openSettings: $('openSettings'),
+  closeSettings: $('closeSettings'),
+  newPwd: $('newPwd'),
+  newPwdConfirm: $('newPwdConfirm'),
+  savePwd: $('savePwd'),
+  clearAll: $('clearAll'),
+  pwdMsg: $('pwdMsg'),
+  exportData: $('exportData'),
+  importFile: $('importFile'),
+  importMsg: $('importMsg'),
+  shareWhatsapp: $('shareWhatsapp'),
+  shareTelegram: $('shareTelegram'),
+  shareX: $('shareX'),
+  shareEmail: $('shareEmail'),
+  copyText: $('copyText'),
+  logoutBtn: $('logoutBtn'),
+  fabBtn: $('fab'),
 };
-const tabs = document.querySelectorAll(".menu-item");
 
-/* ------------------------------------------------ */
-/* ● ANIMAÇÃO DO PERGAMINHO                         */
-/* ------------------------------------------------ */
-setTimeout(()=>{
+/* fallback for missing refs (some share buttons might be null if DOM differences) */
+['shareWhatsapp','shareTelegram','shareX','shareEmail','copyText'].forEach(k => { if(!refs[k]) refs[k]=null; });
 
-  // som jutsu
-  playJutsuTone();
-  // fumaça aparece
-  refs.smoke.style.opacity = "1";
+/* ------------------------------------------------
+   Start only after full load — guarantee timing
+   ------------------------------------------------ */
+window.onload = function(){
+  // ensure scroll visible and force reflow
+  refs.scrollScreen.style.opacity = '1';
+  refs.scrollScreen.classList.add('visible-force');
 
-  // espera 2s para fumaça expandir
-  setTimeout(()=>{
+  // sequence timings (cinematic long intro)
+  // 1) dropIn + unroll are CSS-driven and already scheduled
+  // 2) after 4.3s: wind sweep
+  setTimeout(()=> {
+    refs.paperWind.classList.add('go');
+  }, 1600); // slight wind early
 
-    // fecha pergaminho em 2.5s
-    refs.core.classList.add("fade-out-scroll");
+  // 3) seal pop at ~2.3s via CSS class — we trigger class to be safe
+  setTimeout(()=> {
+    refs.seal.classList.add('pop');
+    // rim pulse
+    refs.chakraRim.classList.add('pulse');
+  }, 2300);
 
-    setTimeout(()=>{
-      refs.scroll.style.display = "none";
+  // 4) title show at ~2.9s (CSS class)
+  setTimeout(()=> {
+    refs.scrollTitle.classList.add('show');
+  }, 2900);
+
+  // 5) smoke show and improved jutsu after 4.5s
+  setTimeout(()=> {
+    refs.smokeLayer1.classList.add('show');
+    setTimeout(()=> refs.smokeLayer2.classList.add('show'), 200);
+    // play refined jutsu sound
+    playJutsuSound();
+  }, 4500);
+
+  // 6) wait the smoke to do its thing (2s), then close slowly (2.2s)
+  setTimeout(()=> {
+    refs.scrollCore.classList.add('scroll-close');
+    refs.chakraRim.classList.remove('pulse');
+    // final hide after close animation
+    setTimeout(()=> {
+      refs.scrollScreen.style.display = 'none';
       showLogin();
-    },2500);
+    }, 2400);
+  }, 6500); // total flow ~8.1s before close starts -> final ~10.5s
+};
 
-  },2000);
-
-},4500);
-
-/* som jutsu via WebAudio (sem ficheiros) */
-function playJutsuTone(){
+/* ------------------------------------------------
+   WebAudio: improved jutsu (multi-osc + noise)
+   ------------------------------------------------ */
+function playJutsuSound(){
   try{
-    const ctx = new AudioContext();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.connect(g);g.connect(ctx.destination);
-    o.type="sine";o.frequency.value=220;
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const now = ctx.currentTime;
-    g.gain.setValueAtTime(0,now);
-    g.gain.linearRampToValueAtTime(0.2,now+.05);
-    o.frequency.exponentialRampToValueAtTime(880,now+.3);
-    g.gain.exponentialRampToValueAtTime(.0001,now+1.3);
-    o.start(now);o.stop(now+1.5);
-  }catch(e){}
+
+    // main swept oscillator
+    const o1 = ctx.createOscillator();
+    o1.type = 'sine';
+    o1.frequency.setValueAtTime(180, now);
+    o1.frequency.exponentialRampToValueAtTime(900, now + 0.45);
+
+    const o2 = ctx.createOscillator();
+    o2.type = 'triangle';
+    o2.frequency.setValueAtTime(260, now);
+    o2.frequency.exponentialRampToValueAtTime(720, now + 0.45);
+
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.linearRampToValueAtTime(0.16, now + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 1.3);
+
+    // slight noise for texture
+    const bufferSize = 2 * ctx.sampleRate;
+    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) output[i] = (Math.random() * 2 - 1) * Math.exp(-i / bufferSize * 2.0);
+
+    const noise = ctx.createBufferSource();
+    noise.buffer = noiseBuffer;
+    const noiseFilter = ctx.createBiquadFilter();
+    noiseFilter.type = 'lowpass';
+    noiseFilter.frequency.value = 1200;
+
+    o1.connect(g); o2.connect(g); g.connect(ctx.destination);
+    noise.connect(noiseFilter); noiseFilter.connect(ctx.destination);
+
+    o1.start(now); o2.start(now); noise.start(now);
+    o1.stop(now + 1.2); o2.stop(now + 1.2); noise.stop(now + 1.2);
+  }catch(e){ /* ignore if not allowed */ }
 }
 
-/* ------------------------------------------------ */
-/* ● LOGIN                                          */
-/* ------------------------------------------------ */
+/* ------------------------------------------------
+   Login and password handling
+   ------------------------------------------------ */
 function showLogin(){
-  refs.login.style.display="flex";
-  updateLoginSubtitle();
+  refs.loginScreen.style.display = 'flex';
+  refs.pwd.focus();
+  refs.loginSub && (refs.loginSub.textContent = state.password ? 'Insere a senha para entrar.' : 'Sem senha definida — define uma agora.');
 }
-function updateLoginSubtitle(){ refs.loginSub.textContent = state.password ? "Insere a senha para entrar." : "Define uma senha." }
 
-refs.btnLogin.onclick = ()=> tryLogin();
-refs.pwd.onkeypress = e=>{ if(e.key==="Enter") tryLogin(); };
 function tryLogin(){
-  if(!state.password){ showSettings(); return; }
-  if(refs.pwd.value===state.password){
-    refs.login.style.display="none";
-    refs.app.style.display="block";
+  const val = refs.pwd.value || '';
+  if(!state.password){
+    // ask to set password
+    showSettings();
+    return;
+  }
+  if(val === state.password){
+    refs.loginScreen.style.display = 'none';
+    refs.app.style.display = 'block';
     renderNotes();
+    refs.pwd.value = '';
   } else {
-    showLoginError("Senha incorreta");
+    refs.errLogin.style.display = 'block';
+    setTimeout(()=> refs.errLogin.style.display = 'none', 1400);
   }
 }
-function showLoginError(msg){
-  refs.errLogin.textContent=msg;
-  refs.errLogin.style.display="block";
-  setTimeout(()=>refs.errLogin.style.display="none",1500);
-}
 
-/* ------------------------------------------------ */
-/* ● SENHA E DEFINIÇÕES                              */
-/* ------------------------------------------------ */
-refs.openSettings.onclick = showSettings;
-refs.btnSetPwd.onclick = showSettings;
-refs.closeSettings.onclick = ()=> refs.modalSettings.style.display="none";
-function showSettings(){ refs.modalSettings.style.display="flex"; }
+refs.btnLogin.addEventListener('click', tryLogin);
+refs.pwd.addEventListener('keypress', e => { if(e.key === 'Enter') tryLogin(); });
 
-refs.savePwd.onclick = ()=>{
-  const a = refs.newPwd.value.trim();
-  const b = refs.newPwdConfirm.value.trim();
-  if(!a){ refs.pwdMsg.textContent="Senha vazia";return; }
-  if(a!==b){ refs.pwdMsg.textContent="Não coincide";return; }
-  state.password=a; saveState();
-  refs.pwdMsg.textContent="Salva!";
-  setTimeout(()=> refs.modalSettings.style.display="none",800);
-};
+/* Settings */
+refs.btnSetPwd.addEventListener('click', showSettings);
+refs.openSettings && refs.openSettings.addEventListener('click', showSettings);
+refs.closeSettings && refs.closeSettings.addEventListener('click', ()=> refs.modalSettings.style.display = 'none');
 
-refs.clearAll.onclick = ()=>{
-  if(confirm("Apagar todas as notas e senha?")){
-    state={password:null,notes:[]}; saveState();
-    alert("Dados apagados!");
-    location.reload();
-  }
-};
+refs.savePwd && refs.savePwd.addEventListener('click', ()=>{
+  const a = refs.newPwd.value || ''; const b = refs.newPwdConfirm.value || '';
+  if(!a){ refs.pwdMsg.textContent = 'Senha vazia'; refs.pwdMsg.style.color = 'var(--danger)'; return; }
+  if(a !== b){ refs.pwdMsg.textContent = 'Senhas não coincidem'; refs.pwdMsg.style.color = 'var(--danger)'; return; }
+  state.password = a; saveState(state);
+  refs.pwdMsg.textContent = 'Senha salva'; refs.pwdMsg.style.color = 'lightgreen';
+  setTimeout(()=> { refs.modalSettings.style.display = 'none'; refs.pwdMsg.textContent = ''; }, 900);
+});
 
-/* EXPORTAR / IMPORTAR */
-refs.exportData.onclick=()=>{
-  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;a.download="universo_backup.json";a.click();
-  URL.revokeObjectURL(url);
-};
-refs.importFile.onchange=(e)=>{
-  const f=e.target.files[0]; if(!f) return;
-  const r=new FileReader();
-  r.onload=()=>{
+refs.clearAll && refs.clearAll.addEventListener('click', ()=> {
+  if(confirm('Apagar tudo (senha + notas)?')){ localStorage.removeItem(LS_KEY); state = {password:null,notes:[]}; saveState(state); location.reload(); }
+});
+
+/* Export/Import */
+refs.exportData && refs.exportData.addEventListener('click', ()=> {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'meu_universo_x_export.json'; a.click(); URL.revokeObjectURL(url);
+});
+refs.importFile && (refs.importFile.onchange = (e)=> {
+  const f = e.target.files[0]; if(!f) return;
+  const reader = new FileReader();
+  reader.onload = ()=> {
     try{
-      const j=JSON.parse(r.result);
-      state=j; saveState();
-      refs.importMsg.textContent="Importado!";
-      setTimeout(()=>location.reload(),800);
-    }catch(err){ refs.importMsg.textContent="Erro no JSON"; }
+      const parsed = JSON.parse(reader.result);
+      if(!confirm('Importar substituirá os dados locais. Continuar?')) return;
+      state = parsed; saveState(state); refs.importMsg.textContent = 'Importado'; setTimeout(()=> location.reload(), 800);
+    }catch(err){ refs.importMsg.textContent = 'JSON inválido'; setTimeout(()=> refs.importMsg.textContent = '', 1600); }
   };
-  r.readAsText(f);
-};
+  reader.readAsText(f);
+});
 
-/* ------------------------------------------------ */
-/* ● NOTAS                                          */
-/* ------------------------------------------------ */
-let current = null;
-
-refs.newNote.onclick = ()=> openEditor(null);
-refs.fab.onclick = ()=> openEditor(null);
-refs.closeModal.onclick = ()=> refs.modal.style.display="none";
+/* ------------------------------------------------
+   Notes CRUD & UI
+   ------------------------------------------------ */
+let currentId = null;
+refs.newNote.addEventListener('click', ()=> openEditor(null));
+refs.fab.addEventListener('click', ()=> openEditor(null));
+refs.closeModal && refs.closeModal.addEventListener('click', ()=> refs.modal.style.display = 'none');
 
 function openEditor(id){
-  current=id;
+  currentId = id;
   if(id){
-    const n=state.notes.find(x=>x.id===id);
-    refs.noteTitle.value=n.title;
-    refs.noteContent.value=n.content;
+    const n = state.notes.find(x=>x.id === id);
+    refs.noteTitle.value = n.title; refs.noteContent.value = n.content;
+  } else { refs.noteTitle.value = ''; refs.noteContent.value = ''; }
+  refs.modal.style.display = 'flex';
+}
+
+refs.saveNote.addEventListener('click', ()=> {
+  const t = refs.noteTitle.value.trim(); const c = refs.noteContent.value.trim();
+  if(currentId){
+    const idx = state.notes.findIndex(n=>n.id === currentId);
+    if(idx > -1){ state.notes[idx].title = t; state.notes[idx].content = c; state.notes[idx].updated = Date.now(); }
   } else {
-    refs.noteTitle.value="";
-    refs.noteContent.value="";
+    state.notes.push({ id: Date.now(), title: t, content: c, created: Date.now(), updated: Date.now(), fav:false, arch:false });
   }
-  refs.modal.style.display="flex";
-}
-
-refs.saveNote.onclick = ()=>{
-  const t=refs.noteTitle.value.trim();
-  const c=refs.noteContent.value.trim();
-  if(current){
-    const n=state.notes.find(x=>x.id===current);
-    n.title=t;n.content=c;n.updated=Date.now();
-  } else {
-    state.notes.push({id:Date.now(),title:t,content:c,created:Date.now(),updated:Date.now(),fav:false,arch:false});
-  }
-  saveState();
-  refs.modal.style.display="none";
-  renderNotes();
-};
-
-refs.delNote.onclick = ()=>{
-  if(current){
-    state.notes=state.notes.filter(n=>n.id!==current);
-    saveState();
-    refs.modal.style.display="none";
-    renderNotes();
-  }
-};
-
-refs.toggleFav.onclick = ()=>{
-  if(current){
-    const n=state.notes.find(x=>x.id===current);
-    n.fav=!n.fav;saveState();renderNotes();
-  }
-};
-
-refs.archiveNote.onclick = ()=>{
-  if(current){
-    const n=state.notes.find(x=>x.id===current);
-    n.arch=!n.arch;saveState();renderNotes();
-  }
-};
-
-/* Renderização */
-function renderNotes(){
-  refs.grid.innerHTML="";
-  const tab=getTab();
-  let arr=[...state.notes].reverse();
-  if(tab==="fav") arr=arr.filter(n=>n.fav && !n.arch);
-  if(tab==="arch") arr=arr.filter(n=>n.arch);
-  arr.forEach(n=>{
-    const card=document.createElement("div");
-    card.className="note";
-    card.innerHTML=`
-      <h4>${escape(n.title)||"Sem título"}</h4>
-      <p>${escape(n.content)}</p>
-      <div class="meta"><span>${new Date(n.created).toLocaleString()}</span><span>${n.fav?"⭐":""}${n.arch?" • arquivada":""}</span></div>
-    `;
-    card.onclick=()=>openEditor(n.id);
-    refs.grid.appendChild(card);
-  });
-  refs.count.textContent=state.notes.length;
-}
-
-function escape(t=""){
-  return t.replaceAll("<","&lt;").replaceAll(">","&gt;");
-}
-
-tabs.forEach(t=>t.onclick=()=>{
-  tabs.forEach(x=>x.classList.remove("active"));
-  t.classList.add("active");
-  renderNotes();
+  saveState(state); refs.modal.style.display = 'none'; renderNotes();
 });
-function getTab(){return document.querySelector(".menu-item.active").dataset.tab;}
 
-refs.search.oninput = ()=> {
-  const q=refs.search.value.toLowerCase();
-  const cards=[...document.querySelectorAll(".note")];
-  cards.forEach(c=>{
-    const text=c.innerText.toLowerCase();
-    c.style.display=text.includes(q)?"block":"none";
+refs.delNote.addEventListener('click', ()=> {
+  if(!currentId) return;
+  if(confirm('Apagar esta nota?')){ state.notes = state.notes.filter(n=>n.id !== currentId); saveState(state); refs.modal.style.display='none'; renderNotes(); }
+});
+refs.toggleFav.addEventListener('click', ()=> {
+  if(!currentId) return; const n = state.notes.find(x=>x.id === currentId); if(n){ n.fav = !n.fav; saveState(state); renderNotes(); }
+});
+refs.archiveNote.addEventListener('click', ()=> {
+  if(!currentId) return; const n = state.notes.find(x=>x.id === currentId); if(n){ n.arch = !n.arch; saveState(state); renderNotes(); }
+});
+
+function renderNotes(){
+  refs.grid.innerHTML = '';
+  const list = Array.isArray(state.notes) ? state.notes.slice().reverse() : [];
+  const active = document.querySelector('.menu-item.active');
+  let filtered = list;
+  if(active && active.dataset.tab === 'fav') filtered = list.filter(n=>n.fav && !n.arch);
+  if(active && active.dataset.tab === 'arch') filtered = list.filter(n=>n.arch);
+  filtered.forEach(n=>{
+    const el = document.createElement('div'); el.className = 'note';
+    el.innerHTML = `<h4>${escapeHtml(n.title || 'Sem título')}</h4><p>${escapeHtml(n.content || '')}</p>
+      <div class="meta"><span>${new Date(n.created).toLocaleString()}</span><span>${n.fav?'⭐':''}${n.arch?' • arquivada':''}</span></div>`;
+    el.addEventListener('click', ()=> { openEditor(n.id); currentId = n.id; });
+    refs.grid.appendChild(el);
   });
-};
-
-/* ------------------------------------------------ */
-/* ● PARTILHAR TEXTO                                */
-/* ------------------------------------------------ */
-function getShare(){
-  const t=refs.noteTitle.value;
-  const c=refs.noteContent.value;
-  return t+"\n\n"+c;
+  refs.count.textContent = state.notes.length;
 }
 
-refs.shareWhatsapp.onclick = ()=> window.open("https://api.whatsapp.com/send?text="+encodeURIComponent(getShare()));
-refs.shareTelegram.onclick = ()=> window.open("https://t.me/share/url?text="+encodeURIComponent(getShare()));
-refs.shareX.onclick = ()=> window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(getShare()));
-refs.shareEmail.onclick = ()=> location.href="mailto:?subject="+encodeURIComponent(refs.noteTitle.value)+"&body="+encodeURIComponent(getShare());
-refs.copyText.onclick = ()=> {navigator.clipboard.writeText(getShare()); alert("Copiado!");};
+function escapeHtml(s=''){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 
-/* ------------------------------------------------ */
-/* ● LOGOUT                                         */
-/* ------------------------------------------------ */
-refs.logoutBtn.onclick = ()=> {
-  refs.app.style.display="none";
-  refs.login.style.display="flex";
-  refs.pwd.value="";
-};
+/* search and tabs */
+refs.search.addEventListener('input', ()=> { const q = refs.search.value.toLowerCase(); document.querySelectorAll('.note').forEach(n=>{ n.style.display = n.innerText.toLowerCase().includes(q) ? 'block' : 'none'; }); });
+document.querySelectorAll('.menu-item').forEach(mi => mi.addEventListener('click', ()=> { document.querySelectorAll('.menu-item').forEach(x=>x.classList.remove('active')); mi.classList.add('active'); renderNotes(); }));
+
+/* ------------------------------------------------
+   Sharing buttons in editor
+   ------------------------------------------------ */
+function getEditorText(){ return (refs.noteTitle.value ? refs.noteTitle.value + '\n\n' : '') + (refs.noteContent.value || ''); }
+refs.shareWhatsapp && refs.shareWhatsapp.addEventListener('click', ()=> window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(getEditorText()), '_blank'));
+refs.shareTelegram && refs.shareTelegram.addEventListener('click', ()=> window.open('https://t.me/share/url?url=&text='+encodeURIComponent(getEditorText()), '_blank'));
+refs.shareX && refs.shareX.addEventListener('click', ()=> window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(getEditorText()), '_blank'));
+refs.shareEmail && refs.shareEmail.addEventListener('click', ()=> window.location.href = 'mailto:?subject='+encodeURIComponent(refs.noteTitle.value || 'Nota')+'&body='+encodeURIComponent(getEditorText()));
+refs.copyText && refs.copyText.addEventListener('click', ()=> { navigator.clipboard.writeText(getEditorText()).then(()=> alert('Copiado!')).catch(()=> alert('Falha ao copiar')); });
+
+/* logout */
+refs.logoutBtn.addEventListener('click', ()=> { if(confirm('Deseja sair?')){ refs.app.style.display='none'; refs.loginScreen.style.display='flex'; } });
+
+/* small safety autosave */
+setInterval(()=> saveState(state), 3000);
+
+/* initial render if already unlocked (dev) */
+if(location.hash === '#dev-autologin' && state.password){ refs.loginScreen.style.display='none'; refs.app.style.display='block'; renderNotes(); }
+
 </script>
 </body>
 </html>

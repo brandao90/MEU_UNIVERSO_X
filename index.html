@@ -109,12 +109,16 @@
             width: 100%;
             height: 100%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
+            display: none;
             justify-content: center;
             align-items: center;
             z-index: 9999;
             opacity: 0;
-            animation: fadeIn 0.5s ease 4.5s forwards;
+        }
+
+        #login-screen.show {
+            display: flex;
+            animation: fadeIn 0.5s ease forwards;
         }
 
         .login-box {
@@ -164,6 +168,13 @@
 
         .login-box button:hover {
             transform: translateY(-2px);
+        }
+
+        .error-msg {
+            color: #f44336;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
         }
 
         @keyframes fadeIn {
@@ -481,8 +492,9 @@
     <div id="login-screen">
         <div class="login-box">
             <h2>🔐 Acesso Seguro</h2>
-            <input type="password" id="password-input" placeholder="Digite a senha" />
-            <button onclick="checkPassword()">Entrar</button>
+            <input type="password" id="password-input" placeholder="Digite a senha" autocomplete="off" />
+            <button id="login-btn">Entrar</button>
+            <p class="error-msg" id="error-msg">❌ Senha incorreta!</p>
             <p style="margin-top: 15px; color: #999; font-size: 12px;">Senha padrão: meuuniversox</p>
         </div>
     </div>
@@ -492,10 +504,10 @@
         <div class="app-header">
             <div class="app-title">📝 Meu Universo X - Notas</div>
             <div class="app-controls">
-                <input type="text" class="search-box" id="search-input" placeholder="🔍 Buscar notas..." onkeyup="searchNotes()">
-                <button class="btn btn-primary" onclick="openModal()">+ Nova Nota</button>
-                <button class="btn btn-secondary" onclick="exportAll()">💾 Exportar Tudo</button>
-                <button class="btn btn-secondary" onclick="logout()">🚪 Sair</button>
+                <input type="text" class="search-box" id="search-input" placeholder="🔍 Buscar notas...">
+                <button class="btn btn-primary" id="new-note-btn">+ Nova Nota</button>
+                <button class="btn btn-secondary" id="export-all-btn">💾 Exportar Tudo</button>
+                <button class="btn btn-secondary" id="logout-btn">🚪 Sair</button>
             </div>
         </div>
 
@@ -508,17 +520,17 @@
             <h2 id="modal-title">Nova Nota</h2>
             <input type="text" id="note-title" placeholder="Título da nota">
             <textarea id="note-content" placeholder="Conteúdo da nota..."></textarea>
-            <div class="color-picker">
-                <div class="color-option active" style="background: #667eea" onclick="selectColor('#667eea')"></div>
-                <div class="color-option" style="background: #f093fb" onclick="selectColor('#f093fb')"></div>
-                <div class="color-option" style="background: #4facfe" onclick="selectColor('#4facfe')"></div>
-                <div class="color-option" style="background: #43e97b" onclick="selectColor('#43e97b')"></div>
-                <div class="color-option" style="background: #fa709a" onclick="selectColor('#fa709a')"></div>
-                <div class="color-option" style="background: #feca57" onclick="selectColor('#feca57')"></div>
+            <div class="color-picker" id="color-picker">
+                <div class="color-option active" style="background: #667eea" data-color="#667eea"></div>
+                <div class="color-option" style="background: #f093fb" data-color="#f093fb"></div>
+                <div class="color-option" style="background: #4facfe" data-color="#4facfe"></div>
+                <div class="color-option" style="background: #43e97b" data-color="#43e97b"></div>
+                <div class="color-option" style="background: #fa709a" data-color="#fa709a"></div>
+                <div class="color-option" style="background: #feca57" data-color="#feca57"></div>
             </div>
             <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
-                <button class="btn btn-primary" onclick="saveNote()">Salvar</button>
+                <button class="btn btn-secondary" id="cancel-btn">Cancelar</button>
+                <button class="btn btn-primary" id="save-btn">Salvar</button>
             </div>
         </div>
     </div>
@@ -527,12 +539,51 @@
         let notes = [];
         let currentNoteId = null;
         let selectedColor = '#667eea';
+        const PASSWORD = 'meuuniversox';
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mostrar tela de login após animação
+            setTimeout(function() {
+                document.getElementById('login-screen').classList.add('show');
+            }, 4500);
+
+            // Event listeners
+            document.getElementById('login-btn').addEventListener('click', checkPassword);
+            document.getElementById('password-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') checkPassword();
+            });
+
+            document.getElementById('new-note-btn').addEventListener('click', () => openModal());
+            document.getElementById('export-all-btn').addEventListener('click', exportAll);
+            document.getElementById('logout-btn').addEventListener('click', logout);
+            document.getElementById('cancel-btn').addEventListener('click', closeModal);
+            document.getElementById('save-btn').addEventListener('click', saveNote);
+            document.getElementById('search-input').addEventListener('keyup', searchNotes);
+
+            // Color picker
+            document.querySelectorAll('.color-option').forEach(opt => {
+                opt.addEventListener('click', function() {
+                    selectedColor = this.getAttribute('data-color');
+                    updateColorSelection();
+                });
+            });
+
+            // Fechar modal ao clicar fora
+            document.getElementById('modal').addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+        });
 
         // Carregar notas do localStorage
         function loadNotes() {
             const saved = localStorage.getItem('universoXNotes');
             if (saved) {
-                notes = JSON.parse(saved);
+                try {
+                    notes = JSON.parse(saved);
+                } catch(e) {
+                    notes = [];
+                }
             }
         }
 
@@ -543,14 +594,21 @@
 
         // Verificar senha
         function checkPassword() {
-            const password = document.getElementById('password-input').value;
-            if (password === 'meuuniversox') {
+            const input = document.getElementById('password-input');
+            const errorMsg = document.getElementById('error-msg');
+            const password = input.value;
+
+            if (password === PASSWORD) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app').style.display = 'block';
                 loadNotes();
                 renderNotes();
+                input.value = '';
+                errorMsg.style.display = 'none';
             } else {
-                alert('❌ Senha incorreta!');
+                errorMsg.style.display = 'block';
+                input.value = '';
+                input.focus();
             }
         }
 
@@ -559,14 +617,8 @@
             document.getElementById('app').style.display = 'none';
             document.getElementById('login-screen').style.display = 'flex';
             document.getElementById('password-input').value = '';
+            document.getElementById('error-msg').style.display = 'none';
         }
-
-        // Enter para login
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('password-input').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') checkPassword();
-            });
-        });
 
         // Abrir modal
         function openModal(noteId = null) {
@@ -578,10 +630,12 @@
 
             if (noteId) {
                 const note = notes.find(n => n.id === noteId);
-                modalTitle.textContent = 'Editar Nota';
-                titleInput.value = note.title;
-                contentInput.value = note.content;
-                selectedColor = note.color;
+                if (note) {
+                    modalTitle.textContent = 'Editar Nota';
+                    titleInput.value = note.title;
+                    contentInput.value = note.content;
+                    selectedColor = note.color;
+                }
             } else {
                 modalTitle.textContent = 'Nova Nota';
                 titleInput.value = '';
@@ -591,6 +645,7 @@
 
             updateColorSelection();
             modal.style.display = 'flex';
+            titleInput.focus();
         }
 
         // Fechar modal
@@ -599,16 +654,10 @@
             currentNoteId = null;
         }
 
-        // Selecionar cor
-        function selectColor(color) {
-            selectedColor = color;
-            updateColorSelection();
-        }
-
         function updateColorSelection() {
             document.querySelectorAll('.color-option').forEach(opt => {
                 opt.classList.remove('active');
-                if (opt.style.background === selectedColor) {
+                if (opt.getAttribute('data-color') === selectedColor) {
                     opt.classList.add('active');
                 }
             });
@@ -626,15 +675,17 @@
 
             if (currentNoteId) {
                 const note = notes.find(n => n.id === currentNoteId);
-                note.title = title;
-                note.content = content;
-                note.color = selectedColor;
-                note.updatedAt = new Date().toISOString();
+                if (note) {
+                    note.title = title;
+                    note.content = content;
+                    note.color = selectedColor;
+                    note.updatedAt = new Date().toISOString();
+                }
             } else {
                 notes.unshift({
                     id: Date.now(),
-                    title,
-                    content,
+                    title: title,
+                    content: content,
                     color: selectedColor,
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()
@@ -658,16 +709,23 @@
         // Exportar nota individual
         function exportNote(id) {
             const note = notes.find(n => n.id === id);
-            const text = `${note.title}\n\n${note.content}\n\nCriado: ${new Date(note.createdAt).toLocaleString()}`;
-            downloadText(text, `${note.title}.txt`);
+            if (!note) return;
+            
+            const text = note.title + '\n\n' + note.content + '\n\nCriado: ' + new Date(note.createdAt).toLocaleString();
+            downloadText(text, note.title + '.txt');
         }
 
         // Compartilhar nota
         function shareNote(id, event) {
             const note = notes.find(n => n.id === id);
-            const text = `${note.title}\n\n${note.content}`;
+            if (!note) return;
+            
+            const text = note.title + '\n\n' + note.content;
             
             event.stopPropagation();
+            
+            // Remover menus anteriores
+            document.querySelectorAll('.share-menu').forEach(m => m.remove());
             
             const menu = document.createElement('div');
             menu.className = 'share-menu';
@@ -676,9 +734,103 @@
             menu.style.left = event.clientX + 'px';
             menu.style.position = 'fixed';
             
+            const encodedText = encodeURIComponent(text);
+            const encodedTitle = encodeURIComponent(note.title);
+            const encodedContent = encodeURIComponent(note.content);
+            
             menu.innerHTML = `
-                <button onclick="shareWhatsApp('${encodeURIComponent(text)}')">📱 WhatsApp</button>
-                <button onclick="shareEmail('${encodeURIComponent(note.title)}', '${encodeURIComponent(note.content)}')">📧 Email</button>
-                <button onclick="shareTwitter('${encodeURIComponent(text)}')">🐦 Twitter</button>
-                <button onclick="shareFacebook()">📘 Facebook</button>
-                <button onclick="copyToC
+                <button onclick="window.open('https://wa.me/?text=${encodedText}', '_blank')">📱 WhatsApp</button>
+                <button onclick="window.location.href='mailto:?subject=${encodedTitle}&body=${encodedContent}'">📧 Email</button>
+                <button onclick="window.open('https://twitter.com/intent/tweet?text=${encodedText}', '_blank')">🐦 Twitter</button>
+                <button onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}', '_blank')">📘 Facebook</button>
+                <button onclick="copyText('${text.replace(/'/g, "\\'")}')">📋 Copiar</button>
+            `;
+            
+            document.body.appendChild(menu);
+            
+            setTimeout(() => {
+                document.addEventListener('click', function closeMenu() {
+                    menu.remove();
+                    document.removeEventListener('click', closeMenu);
+                });
+            }, 100);
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ Copiado para a área de transferência!');
+            });
+        }
+
+        // Exportar todas as notas
+        function exportAll() {
+            if (notes.length === 0) {
+                alert('⚠️ Nenhuma nota para exportar!');
+                return;
+            }
+
+            const data = JSON.stringify(notes, null, 2);
+            downloadText(data, 'meu-universo-x-backup.json');
+        }
+
+        // Download de arquivo
+        function downloadText(text, filename) {
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Buscar notas
+        function searchNotes() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            renderNotes(query);
+        }
+
+        // Renderizar notas
+        function renderNotes(searchQuery = '') {
+            const container = document.getElementById('notes-container');
+            let filtered = notes;
+
+            if (searchQuery) {
+                filtered = notes.filter(n => 
+                    n.title.toLowerCase().includes(searchQuery) || 
+                    n.content.toLowerCase().includes(searchQuery)
+                );
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <h2>✨ Nenhuma nota encontrada</h2>
+                        <p>Comece criando sua primeira nota!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(note => {
+                const escapedTitle = note.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                return `
+                <div class="note-card" onclick="openModal(${note.id})" style="--note-color: ${note.color}">
+                    <div class="note-title">${note.title}</div>
+                    <div class="note-date">${new Date(note.updatedAt).toLocaleString('pt-BR')}</div>
+                    <div class="note-content">${note.content}</div>
+                    <div class="note-actions">
+                        <button class="btn-edit" onclick="event.stopPropagation(); openModal(${note.id})">✏️ Editar</button>
+                        <button class="btn-delete" onclick="event.stopPropagation(); deleteNote(${note.id})">🗑️ Deletar</button>
+                        <button class="btn-export" onclick="event.stopPropagation(); exportNote(${note.id})">💾 Exportar</button>
+                        <button class="btn-share" onclick="event.stopPropagation(); shareNote(${note.id}, event)">🔗 Compartilhar</button>
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>

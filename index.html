@@ -1,479 +1,1026 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Meu Universo X — Seguro (AES-GCM)</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Universo X</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<!-- Dependências CDN -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1a0033 0%, #2d0a4e 50%, #1a0033 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-<style>
-  :root{--bg:#071021;--accent:#8b5cf6}
-  html,body,#app{height:100%}
-  body{margin:0;font-family:Inter,system-ui; background:linear-gradient(180deg,#071021,#041226); color:#eaf2ff}
-  .handwriting{font-family:'Caveat',cursive}
-  .btn { background:linear-gradient(90deg,var(--accent),#ec4899); color:white; padding:.5rem .9rem; border-radius:8px; }
-  .ghost{opacity:.06}
-  .postit{border-radius:10px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,0.6)}
-  .modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:60; background:rgba(1,4,10,0.6) }
-  .card { background:linear-gradient(145deg,#fff9e6,#fef5d4); color:#071021; padding:16px; border-radius:10px; box-shadow:0 20px 50px rgba(0,0,0,0.6)}
-  input,textarea{font-family:inherit}
-  .small{font-size:12px;color:rgba(0,0,0,0.6)}
-</style>
+        /* Tela de Splash */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a0033 0%, #2d0a4e 50%, #1a0033 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeOut 0.5s ease-in-out 2.5s forwards;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        .splash-stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .splash-logo {
+            position: relative;
+            z-index: 2;
+            animation: zoomIn 1s ease-out;
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .monkey-scientist {
+            width: 200px;
+            height: 200px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 30px rgba(186, 85, 211, 0.6));
+        }
+
+        .splash-title {
+            font-size: 48px;
+            font-weight: bold;
+            color: #ff69b4;
+            text-shadow: 0 0 20px rgba(255, 105, 180, 0.8);
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px rgba(255, 105, 180, 0.8); }
+            50% { text-shadow: 0 0 40px rgba(255, 105, 180, 1); }
+        }
+
+        /* Tela de Login */
+        #login-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a0033 0%, #2d0a4e 50%, #1a0033 100%);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .login-logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+        }
+
+        .login-title {
+            color: #ff69b4;
+            font-size: 32px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 2px solid rgba(255, 105, 180, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .login-input:focus {
+            border-color: #ff69b4;
+            box-shadow: 0 0 15px rgba(255, 105, 180, 0.5);
+        }
+
+        .login-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #ff69b4, #ba55d3);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 105, 180, 0.6);
+        }
+
+        .error-message {
+            color: #ff4444;
+            margin-top: 15px;
+            display: none;
+        }
+
+        /* App Principal */
+        #main-app {
+            display: none;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .app-header {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 105, 180, 0.3);
+        }
+
+        .app-title {
+            color: #ff69b4;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            padding: 8px 16px;
+            background: rgba(255, 105, 180, 0.2);
+            border: 1px solid rgba(255, 105, 180, 0.3);
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 105, 180, 0.4);
+        }
+
+        /* Sidebar */
+        .app-container {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 105, 180, 0.3);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            margin-bottom: 30px;
+        }
+
+        .sidebar-title {
+            color: #ff69b4;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-item {
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255, 105, 180, 0.2);
+            color: #fff;
+        }
+
+        .sidebar-item.active {
+            background: rgba(255, 105, 180, 0.3);
+            color: #fff;
+        }
+
+        /* Área Principal */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 105, 180, 0.3);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-btn {
+            padding: 8px 16px;
+            background: rgba(255, 105, 180, 0.2);
+            border: 1px solid rgba(255, 105, 180, 0.3);
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .toolbar-btn:hover {
+            background: rgba(255, 105, 180, 0.4);
+        }
+
+        /* Área de Notas/Documentos */
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Estilo Keep - Cards de Notas */
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .note-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 105, 180, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .note-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(255, 105, 180, 0.4);
+        }
+
+        .note-title {
+            color: #ff69b4;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .note-content {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .note-date {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        /* Editor de Markdown (Obsidian Style) */
+        .markdown-editor {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .editor-header {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 105, 180, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .editor-title-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #ff69b4;
+            font-size: 24px;
+            font-weight: bold;
+            outline: none;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .editor-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .editor-pane {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .editor-textarea {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            resize: none;
+            outline: none;
+        }
+
+        .preview-pane {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            border-left: 1px solid rgba(255, 105, 180, 0.3);
+            color: #fff;
+        }
+
+        /* Modal para Nova Nota */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: rgba(26, 0, 51, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 105, 180, 0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-title {
+            color: #ff69b4;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .modal-input, .modal-textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 105, 180, 0.3);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .modal-textarea {
+            min-height: 150px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .modal-btn-primary {
+            background: linear-gradient(135deg, #ff69b4, #ba55d3);
+            color: #fff;
+        }
+
+        .modal-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 105, 180, 0.3);
+        }
+
+        /* Scrollbar customizada */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 105, 180, 0.5);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 105, 180, 0.7);
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -250px;
+                height: 100%;
+                z-index: 999;
+                transition: left 0.3s;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .editor-container {
+                flex-direction: column;
+            }
+
+            .preview-pane {
+                border-left: none;
+                border-top: 1px solid rgba(255, 105, 180, 0.3);
+            }
+        }
+    </style>
 </head>
 <body>
-<div id="app" class="h-screen grid grid-rows-[auto_1fr]">
-  <!-- Header -->
-  <header class="flex items-center justify-between px-4 py-3 border-b border-white/6">
-    <div class="flex items-center gap-3">
-      <img id="logo" src='/mnt/data/A_composite_digital_screenshot_of_"Meu_Universo_X,.png' alt="macaco" class="w-10 h-10 rounded-md object-cover" onerror="this.style.display='none'">
-      <div>
-        <div class="font-semibold text-lg">Meu Universo X — Seguro</div>
-        <div class="text-xs opacity-70">Notas encriptadas localmente (AES-GCM-256)</div>
-      </div>
-    </div>
-    <div class="flex items-center gap-3">
-      <input id="search" placeholder="Procurar..." class="bg-transparent border border-white/6 px-3 py-2 rounded-md" />
-      <button id="btn-new" class="btn">+ Nova</button>
-      <button id="btn-export" class="px-3 py-2 rounded border border-white/8">Export encriptado</button>
-      <button id="btn-import" class="px-3 py-2 rounded border border-white/8">Importar backup</button>
-    </div>
-  </header>
-
-  <!-- Main -->
-  <main class="p-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
-    <section class="lg:col-span-2 relative" id="viz-area">
-      <canvas id="canvas3d" class="w-full h-96 bg-transparent"></canvas>
-      <div class="mt-4 grid grid-cols-3 gap-3" id="grid"></div>
-    </section>
-
-    <aside>
-      <div class="card">
-        <h3 class="font-semibold">Controle</h3>
-        <p class="small mt-2">Estado: <span id="lock-status">Bloqueado</span></p>
-        <div class="mt-4">
-          <button id="btn-lock" class="px-3 py-2 rounded border">Bloquear</button>
-          <button id="btn-change-pass" class="px-3 py-2 rounded border">Mudar Password</button>
+    <!-- Tela de Splash -->
+    <div id="splash-screen">
+        <div class="splash-stars"></div>
+        <div class="splash-logo">
+            <svg class="monkey-scientist" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <!-- Corpo do macaco cientista -->
+                <ellipse cx="100" cy="140" rx="45" ry="55" fill="#fff"/>
+                <!-- Jaleco -->
+                <path d="M70 110 L70 180 L130 180 L130 110" fill="#fff" stroke="#333" stroke-width="2"/>
+                <!-- Bolso -->
+                <rect x="75" y="140" width="20" height="25" fill="none" stroke="#333" stroke-width="1"/>
+                <!-- Cabeça -->
+                <circle cx="100" cy="80" r="35" fill="#d2691e"/>
+                <!-- Orelhas -->
+                <ellipse cx="70" cy="75" rx="12" ry="18" fill="#d2691e"/>
+                <ellipse cx="130" cy="75" rx="12" ry="18" fill="#d2691e"/>
+                <!-- Óculos -->
+                <rect x="75" y="70" width="20" height="18" rx="3" fill="rgba(255,255,255,0.7)" stroke="#333" stroke-width="2"/>
+                <rect x="105" y="70" width="20" height="18" rx="3" fill="rgba(255,255,255,0.7)" stroke="#333" stroke-width="2"/>
+                <line x1="95" y1="79" x2="105" y2="79" stroke="#333" stroke-width="2"/>
+                <!-- Olhos -->
+                <circle cx="85" cy="79" r="4" fill="#333"/>
+                <circle cx="115" cy="79" r="4" fill="#333"/>
+                <!-- Nariz -->
+                <ellipse cx="100" cy="90" rx="8" ry="6" fill="#8b4513"/>
+                <!-- Boca -->
+                <path d="M90 98 Q100 102 110 98" fill="none" stroke="#333" stroke-width="2"/>
+                <!-- Lápis na orelha -->
+                <rect x="130" y="65" width="3" height="25" fill="#ff69b4" transform="rotate(30 131.5 77.5)"/>
+                <polygon points="131.5,63 129,66 134,66" fill="#333"/>
+            </svg>
+            <div class="splash-title">MEU UNIVERSO X</div>
         </div>
-        <div class="mt-4">
-          <label class="small">Auto-lock (min)</label>
-          <input id="auto-lock" type="number" value="5" min="1" class="w-full mt-1 p-2 rounded border small"/>
-        </div>
-        <div class="mt-4 small">Backups encriptados são seguros — guarda fora do navegador.</div>
-      </div>
-
-      <div class="card mt-4">
-        <h4 class="font-semibold">Ajuda rápida</h4>
-        <ul class="small mt-2">
-          <li>✅ A password nunca é enviada — só usada para derivar a chave.</li>
-          <li>✅ Backup exportado contém salt+iv+ciphertext.</li>
-          <li>⚠️ Se perderes a password, não há recuperação.</li>
-        </ul>
-      </div>
-    </aside>
-  </main>
-</div>
-
-<!-- MODAIS -->
-<div id="modal-lock" class="modal" style="display:block">
-  <div class="card w-full max-w-md">
-    <h3 class="handwriting text-2xl">Meu Universo X — Acesso Seguro</h3>
-    <p class="small mt-1">Insere a tua password mestra para desbloquear as notas.</p>
-
-    <div id="first-setup" style="display:none">
-      <p class="mt-3 small">Parece que é a primeira utilização. Cria uma password forte (memorizá-la).</p>
-      <input id="new-pass" type="password" placeholder="Nova password" class="w-full mt-2 p-2 rounded border"/>
-      <input id="new-pass-confirm" type="password" placeholder="Confirmar password" class="w-full mt-2 p-2 rounded border"/>
-      <div class="flex gap-2 mt-3">
-        <button id="setup-btn" class="btn">Criar password</button>
-      </div>
     </div>
 
-    <div id="login-area" style="display:none">
-      <input id="master-pass" type="password" placeholder="Password" class="w-full mt-3 p-2 rounded border"/>
-      <div class="flex gap-2 mt-3">
-        <button id="unlock-btn" class="btn">Desbloquear</button>
-      </div>
-      <p class="small mt-2">Se não lembrares a password, não há recuperação — por design.</p>
+    <!-- Tela de Login -->
+    <div id="login-screen">
+        <div class="login-container">
+            <svg class="login-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="100" cy="140" rx="45" ry="55" fill="#fff"/>
+                <path d="M70 110 L70 180 L130 180 L130 110" fill="#fff" stroke="#333" stroke-width="2"/>
+                <rect x="75" y="140" width="20" height="25" fill="none" stroke="#333" stroke-width="1"/>
+                <circle cx="100" cy="80" r="35" fill="#d2691e"/>
+                <ellipse cx="70" cy="75" rx="12" ry="18" fill="#d2691e"/>
+                <ellipse cx="130" cy="75" rx="12" ry="18" fill="#d2691e"/>
+                <rect x="75" y="70" width="20" height="18" rx="3" fill="rgba(255,255,255,0.7)" stroke="#333" stroke-width="2"/>
+                <rect x="105" y="70" width="20" height="18" rx="3" fill="rgba(255,255,255,0.7)" stroke="#333" stroke-width="2"/>
+                <line x1="95" y1="79" x2="105" y2="79" stroke="#333" stroke-width="2"/>
+                <circle cx="85" cy="79" r="4" fill="#333"/>
+                <circle cx="115" cy="79" r="4" fill="#333"/>
+                <ellipse cx="100" cy="90" rx="8" ry="6" fill="#8b4513"/>
+                <path d="M90 98 Q100 102 110 98" fill="none" stroke="#333" stroke-width="2"/>
+                <rect x="130" y="65" width="3" height="25" fill="#ff69b4" transform="rotate(30 131.5 77.5)"/>
+                <polygon points="131.5,63 129,66 134,66" fill="#333"/>
+            </svg>
+            <h2 class="login-title">Bem-vindo!</h2>
+            <input type="password" class="login-input" id="password-input" placeholder="Digite sua senha">
+            <button class="login-button" onclick="checkPassword()">Entrar</button>
+            <p class="error-message" id="error-message">Senha incorreta! Tente novamente.</p>
+        </div>
     </div>
-  </div>
-</div>
 
-<!-- EDITOR (modal simples) -->
-<div id="modal-editor" class="modal" style="display:none">
-  <div class="card max-w-3xl w-full">
-    <div class="flex justify-between items-start">
-      <div>
-        <input id="edit-title" placeholder="Título" class="w-full p-2 rounded border" />
-        <textarea id="edit-body" rows="8" class="w-full mt-2 p-3 rounded border" placeholder="Escreve... usa #tags e [[Wikilinks]]"></textarea>
-      </div>
-      <div style="width:220px;margin-left:12px">
-        <label class="small">Cor</label>
-        <input id="edit-color" type="color" value="#fff1cc" class="w-full mt-2 p-2 rounded border"/>
-        <div class="mt-3 flex gap-2">
-          <button id="save-note" class="btn">Salvar</button>
-          <button id="close-editor" class="px-3 py-2 rounded border">Fechar</button>
+    <!-- App Principal -->
+    <div id="main-app">
+        <header class="app-header">
+            <h1 class="app-title">🧪 Meu Universo X</h1>
+            <div class="header-buttons">
+                <button class="header-btn" onclick="toggleView()">Alternar Visão</button>
+                <button class="header-btn" onclick="logout()">Sair</button>
+            </div>
+        </header>
+
+        <div class="app-container">
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-title">📋 Notas Rápidas</div>
+                    <div class="sidebar-item active" onclick="showNotes()">Todas as Notas</div>
+                    <div class="sidebar-item" onclick="showArchived()">Arquivadas</div>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-title">📝 Documentos</div>
+                    <div class="sidebar-item" onclick="showDocuments()">Meus Documentos</div>
+                    <div class="sidebar-item" onclick="showMarkdown()">Novo Markdown</div>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-title">🏷️ Tags</div>
+                    <div class="sidebar-item">#trabalho</div>
+                    <div class="sidebar-item">#pessoal</div>
+                    <div class="sidebar-item">#ideias</div>
+                </div>
+            </aside>
+
+            <main class="main-content">
+                <div class="toolbar">
+                    <button class="toolbar-btn" onclick="openNewNoteModal()">➕ Nova Nota</button>
+                    <button class="toolbar-btn" onclick="createMarkdown()">📄 Novo Documento</button>
+                    <button class="toolbar-btn" onclick="searchNotes()">🔍 Pesquisar</button>
+                </div>
+
+                <div class="content-area" id="content-area">
+                    <div class="notes-grid" id="notes-grid">
+                        <!-- Notas serão inseridas aqui -->
+                    </div>
+                </div>
+
+                <!-- Editor Markdown -->
+                <div class="markdown-editor" id="markdown-editor">
+                    <div class="editor-header">
+                        <input type="text" class="editor-title-input" placeholder="Título do Documento" id="doc-title">
+                        <div class="editor-actions">
+                            <button class="toolbar-btn" onclick="saveMarkdown()">💾 Salvar</button>
+                            <button class="toolbar-btn" onclick="closeEditor()">❌ Fechar</button>
+                        </div>
+                    </div>
+                    <div class="editor-container">
+                        <div class="editor-pane">
+                            <textarea class="editor-textarea" id="markdown-input" placeholder="Digite seu markdown aqui..."></textarea>
+                        </div>
+                        <div class="preview-pane" id="markdown-preview">
+                            <p style="color: rgba(255,255,255,0.5);">A prévia aparecerá aqui...</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
-        <div class="mt-3">
-          <button id="del-note" class="px-3 py-2 rounded border">Excluir</button>
-        </div>
-      </div>
     </div>
-  </div>
-</div>
 
-<script>
-/* ============================================
-   Segurança criptográfica - AES-GCM via WebCrypto
-   Design:
-   - password -> PBKDF2(salt) -> key (AES-GCM-256)
-   - salt salvo em localStorage (não sensível por si só)
-   - dados salvos em localStorage sob chave 'mux_cipher'
-   - export contém {salt, iv, data} em base64 JSON
-   - on first use: cria salt e pede password inicial
-   - timeout: auto-lock após X minutos (configurável)
-   ============================================*/
-
-const STORAGE_SALT = 'mux_salt_v1';
-const STORAGE_CIPHER = 'mux_cipher_v1';
-const STORAGE_META = 'mux_meta_v1'; // metadata optional
-let masterKey = null; // CryptoKey
-let unlocked = false;
-let notes = []; // in-memory decrypted notes
-let autoLockMinutes = 5;
-let autoLockTimer = null;
-let lastActivity = Date.now();
-
-/* ---------- helpers Base64 ---------- */
-function bufToB64(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))); }
-function b64ToBuf(b64){ const bin = atob(b64); const arr = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i); return arr.buffer; }
-
-/* ---------- derivation: PBKDF2 ---------- */
-async function deriveKeyFromPassword(password, saltBase64){
-  const enc = new TextEncoder();
-  const pwKey = await window.crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
-  const salt = b64ToBuf(saltBase64);
-  const key = await window.crypto.subtle.deriveKey(
-    {name:'PBKDF2', salt, iterations:250000, hash:'SHA-256'},
-    pwKey,
-    {name:'AES-GCM', length:256},
-    false,
-    ['encrypt','decrypt']
-  );
-  return key;
-}
-
-/* ---------- random salt/iv ---------- */
-function randomBytes(n){ const arr = new Uint8Array(n); crypto.getRandomValues(arr); return arr.buffer; }
-function generateSalt(){ return bufToB64(randomBytes(16)); }
-function generateIV(){ return bufToB64(randomBytes(12)); }
-
-/* ---------- encrypt/decrypt ---------- */
-async function encryptNotesWithKey(key, plainObj){
-  const ivB64 = generateIV();
-  const enc = new TextEncoder();
-  const raw = enc.encode(JSON.stringify(plainObj));
-  const ciphertext = await crypto.subtle.encrypt({name:'AES-GCM', iv: b64ToBuf(ivB64)}, key, raw);
-  return { iv: ivB64, data: bufToB64(ciphertext) };
-}
-
-async function decryptNotesWithKey(key, ivB64, dataB64){
-  try{
-    const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv: b64ToBuf(ivB64)}, key, b64ToBuf(dataB64));
-    const dec = new TextDecoder().decode(pt);
-    return JSON.parse(dec);
-  }catch(e){
-    throw new Error('Desencriptação falhou — password errada ou dados corrompidos.');
-  }
-}
-
-/* ---------- storage helpers ---------- */
-function saveCipherToStorage(saltB64, ivB64, dataB64){
-  const payload = { salt: saltB64, iv: ivB64, data: dataB64, timestamp: Date.now() };
-  localStorage.setItem(STORAGE_CIPHER, JSON.stringify(payload));
-}
-function loadCipherFromStorage(){ const raw = localStorage.getItem(STORAGE_CIPHER); return raw ? JSON.parse(raw) : null; }
-function saveSalt(saltB64){ localStorage.setItem(STORAGE_SALT, saltB64); }
-function loadSalt(){ return localStorage.getItem(STORAGE_SALT); }
-
-/* ---------- high-level flows ---------- */
-async function initialSetup(password){
-  const salt = generateSalt();
-  saveSalt(salt);
-  const key = await deriveKeyFromPassword(password, salt);
-  // start with empty notes
-  const enc = await encryptNotesWithKey(key, []);
-  saveCipherToStorage(salt, enc.iv, enc.data);
-  masterKey = key; unlocked=true;
-  notes = [];
-  onUnlocked();
-}
-
-async function unlockWithPassword(password){
-  const salt = loadSalt();
-  if(!salt) throw new Error('Sem configuração inicial. Cria uma password primeiro.');
-  const key = await deriveKeyFromPassword(password, salt);
-  const cipher = loadCipherFromStorage();
-  if(!cipher) { masterKey = key; unlocked=true; notes=[]; onUnlocked(); return; }
-  const pt = await decryptNotesWithKey(key, cipher.iv, cipher.data);
-  masterKey = key; unlocked=true; notes = pt || [];
-  onUnlocked();
-}
-
-async function saveNotesEncrypted(){
-  if(!masterKey) throw new Error('Sem chave ativa');
-  const enc = await encryptNotesWithKey(masterKey, notes);
-  // salt already present in storage
-  const salt = loadSalt();
-  saveCipherToStorage(salt, enc.iv, enc.data);
-}
-
-async function changePassword(oldPass, newPass){
-  // derive old key to decrypt, then derive new key and re-encrypt with new salt
-  const saltOld = loadSalt();
-  const keyOld = await deriveKeyFromPassword(oldPass, saltOld);
-  const cipher = loadCipherFromStorage();
-  const pt = cipher ? await decryptNotesWithKey(keyOld, cipher.iv, cipher.data) : [];
-  // now create new salt/key and store
-  const saltNew = generateSalt();
-  saveSalt(saltNew);
-  const keyNew = await deriveKeyFromPassword(newPass, saltNew);
-  const enc = await encryptNotesWithKey(keyNew, pt);
-  saveCipherToStorage(saltNew, enc.iv, enc.data);
-  masterKey = keyNew; notes = pt; unlocked=true; onUnlocked();
-}
-
-/* ---------- export / import ---------- */
-function exportEncryptedBackup(){
-  const cipher = loadCipherFromStorage();
-  if(!cipher) return alert('Sem dados para exportar');
-  const meta = { app:'Meu Universo X', version:'mux-v1' };
-  const out = { meta, payload: cipher };
-  const blob = new Blob([JSON.stringify(out)], {type:'application/json'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'meu_universo_x_backup_muxbak.json'; a.click();
-}
-
-function importEncryptedBackup(file){
-  const fr = new FileReader();
-  fr.onload = (e)=>{
-    try{
-      const parsed = JSON.parse(e.target.result);
-      if(!parsed || !parsed.payload || !parsed.payload.salt) return alert('Backup inválido');
-      // store payload as-is (will require the correct password to decrypt later)
-      localStorage.setItem(STORAGE_CIPHER, JSON.stringify(parsed.payload));
-      localStorage.setItem(STORAGE_SALT, parsed.payload.salt);
-      alert('Backup importado. Agora desbloqueia com a tua password para desencriptar.');
-      location.reload();
-    }catch(err){ alert('Falha ao importar: '+err.message) }
-  };
-  fr.readAsText(file);
-}
-
-/* ---------- locking behavior ---------- */
-function lockNow(){
-  masterKey = null; unlocked=false; notes=[]; clearTimeout(autoLockTimer);
-  document.getElementById('modal-lock').style.display = 'flex';
-  document.getElementById('lock-status').innerText = 'Bloqueado';
-}
-
-function scheduleAutoLock(){
-  clearTimeout(autoLockTimer);
-  const mins = Number(document.getElementById('auto-lock').value) || autoLockMinutes;
-  autoLockTimer = setTimeout(()=>{ lockNow(); alert('Sessão bloqueada por inatividade.'); }, mins*60*1000);
-  document.getElementById('lock-status').innerText = 'Desbloqueado (auto-lock em '+mins+' min)';
-}
-
-/* ---------- UI wiring & note model ---------- */
-function renderGrid(){
-  const grid = document.getElementById('grid');
-  grid.innerHTML = '';
-  notes.slice().reverse().forEach(n=>{
-    const el = document.createElement('div');
-    el.className = 'postit';
-    el.style.background = n.color || '#fff9e6';
-    el.innerHTML = `
-      <div style="padding:10px; width:100%; border-radius:8px">
-        <div style="font-weight:600">${escapeHtml(n.title || 'Sem título')}</div>
-        <div style="margin-top:6px;color:#111;opacity:0.86">${escapeHtml(truncate(n.body || '', 140))}</div>
-        <div style="margin-top:10px;display:flex;gap:6px;justify-content:flex-end">
-          <button class="open" data-id="${n.id}" style="padding:6px;border-radius:6px;border:1px solid rgba(0,0,0,0.06)">Abrir</button>
+    <!-- Modal Nova Nota -->
+    <div class="modal" id="note-modal">
+        <div class="modal-content">
+            <h3 class="modal-title">Nova Nota Rápida</h3>
+            <input type="text" class="modal-input" id="note-title-input" placeholder="Título">
+            <textarea class="modal-textarea" id="note-content-input" placeholder="Conteúdo da nota..."></textarea>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-secondary" onclick="closeNoteModal()">Cancelar</button>
+                <button class="modal-btn modal-btn-primary" onclick="saveNote()">Salvar</button>
+            </div>
         </div>
-      </div>`;
-    el.querySelector('.open').addEventListener('click', ()=> openEditor(n.id));
-    grid.appendChild(el);
-  });
-}
+    </div>
 
-/* tiny helpers */
-function escapeHtml(s){ if(!s) return ''; return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-function truncate(s,l){ return s.length>l? s.slice(0,l-1)+'...':s; }
-function uid(){ return 'n_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8) }
+    <script>
+        // Configuração de senha
+        const APP_PASSWORD = "universo123"; // ALTERE AQUI SUA SENHA
 
-/* Editor flow */
-function openEditor(id){
-  if(!unlocked) return alert('Desbloqueia primeiro');
-  const modal = document.getElementById('modal-editor');
-  modal.style.display='flex';
-  const title = document.getElementById('edit-title');
-  const body = document.getElementById('edit-body');
-  const color = document.getElementById('edit-color');
-  if(id){
-    const n = notes.find(x=>x.id===id);
-    title.value = n.title || '';
-    body.value = n.body || '';
-    color.value = n.color || '#fff1cc';
-    modal.dataset.editId = id;
-  }else{
-    title.value=''; body.value=''; color.value='#fff1cc'; modal.dataset.editId = '';
-  }
-}
+        // Dados em memória
+        let notes = [];
+        let documents = [];
+        let currentView = 'notes';
 
-/* save from editor */
-document.getElementById('save-note').addEventListener('click', async ()=>{
-  const id = document.getElementById('modal-editor').dataset.editId;
-  const t = document.getElementById('edit-title').value.trim();
-  const b = document.getElementById('edit-body').value.trim();
-  const c = document.getElementById('edit-color').value;
-  if(id){
-    const n = notes.find(x=>x.id===id);
-    n.title = t; n.body = b; n.color = c; n.updatedAt = Date.now();
-  }else{
-    notes.push({ id: uid(), title: t, body: b, color: c, createdAt: Date.now(), updatedAt: Date.now() });
-  }
-  await saveNotesEncrypted();
-  document.getElementById('modal-editor').style.display='none';
-  renderGrid();
-  scheduleAutoLock();
-});
+        // Inicialização
+        setTimeout(() => {
+            document.getElementById('splash-screen').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+            createStars();
+        }, 2500);
 
-/* new note */
-document.getElementById('btn-new').addEventListener('click', ()=> openEditor(null));
-document.getElementById('close-editor').addEventListener('click', ()=> document.getElementById('modal-editor').style.display='none');
+        function createStars() {
+            const container = document.querySelector('.splash-stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(star);
+            }
+        }
 
-/* delete note */
-document.getElementById('del-note').addEventListener('click', async ()=>{
-  const id = document.getElementById('modal-editor').dataset.editId;
-  if(!id) return alert('Nota não guardada ainda');
-  if(!confirm('Confirmar exclusão?')) return;
-  notes = notes.filter(x=>x.id!==id);
-  await saveNotesEncrypted();
-  document.getElementById('modal-editor').style.display='none';
-  renderGrid();
-});
+        function checkPassword() {
+            const input = document.getElementById('password-input');
+            const error = document.getElementById('error-message');
+            
+            if (input.value === APP_PASSWORD) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+                loadInitialData();
+            } else {
+                error.style.display = 'block';
+                input.value = '';
+                input.style.animation = 'shake 0.5s';
+                setTimeout(() => input.style.animation = '', 500);
+            }
+        }
 
-/* unlock modal wiring */
-document.getElementById('unlock-btn').addEventListener('click', async ()=>{
-  const pass = document.getElementById('master-pass').value;
-  if(!pass) return alert('Insere a password');
-  try{
-    await unlockWithPassword(pass);
-  }catch(err){ alert(err.message); return; }
-  document.getElementById('modal-lock').style.display='none';
-});
+        document.getElementById('password-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkPassword();
+        });
 
-/* first setup */
-document.getElementById('setup-btn').addEventListener('click', async ()=>{
-  const p1 = document.getElementById('new-pass').value;
-  const p2 = document.getElementById('new-pass-confirm').value;
-  if(!p1 || p1.length < 8) return alert('Password mínima: 8 caracteres');
-  if(p1 !== p2) return alert('Passwords não coincidem');
-  await initialSetup(p1);
-  document.getElementById('modal-lock').style.display='none';
-});
+        function logout() {
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('password-input').value = '';
+        }
 
-/* lock button */
-document.getElementById('btn-lock').addEventListener('click', ()=> lockNow());
+        function loadInitialData() {
+            notes = [
+                {
+                    id: 1,
+                    title: "Bem-vindo ao Meu Universo X!",
+                    content: "Este é seu espaço pessoal para organizar notas, documentos e ideias. Explore as funcionalidades!",
+                    date: new Date().toLocaleDateString()
+                },
+                {
+                    id: 2,
+                    title: "Ideias de Projeto",
+                    content: "Criar um sistema de gerenciamento completo com integração de notas e documentos markdown.",
+                    date: new Date().toLocaleDateString()
+                }
+            ];
+            renderNotes();
+        }
 
-/* change password UI */
-document.getElementById('btn-change-pass').addEventListener('click', async ()=>{
-  if(!unlocked) return alert('Desbloqueia primeiro');
-  const oldP = prompt('Password actual:');
-  if(!oldP) return;
-  const newP = prompt('Nova password (mín 8 chars):');
-  if(!newP || newP.length<8) return alert('Password inválida');
-  try{
-    await changePassword(oldP, newP);
-    alert('Password alterada com sucesso.');
-    scheduleAutoLock();
-  }catch(err){ alert('Não foi possível mudar password: '+err.message) }
-});
+        function renderNotes() {
+            const grid = document.getElementById('notes-grid');
+            grid.innerHTML = notes.map(note => `
+                <div class="note-card" onclick="editNote(${note.id})">
+                    <div class="note-title">${note.title}</div>
+                    <div class="note-content">${note.content.substring(0, 150)}${note.content.length > 150 ? '...' : ''}</div>
+                    <div class="note-date">${note.date}</div>
+                </div>
+            `).join('');
+        }
 
-/* export/import */
-document.getElementById('btn-export').addEventListener('click', ()=> exportEncryptedBackup());
-document.getElementById('btn-import').addEventListener('click', ()=>{
-  const f = document.createElement('input'); f.type='file'; f.accept='application/json';
-  f.onchange = e => { if(e.target.files[0]) importEncryptedBackup(e.target.files[0]); };
-  f.click();
-});
+        function openNewNoteModal() {
+            document.getElementById('note-modal').style.display = 'flex';
+        }
 
-/* search */
-document.getElementById('search').addEventListener('input', (e)=>{
-  const q = e.target.value.trim().toLowerCase();
-  const cards = document.querySelectorAll('#grid > div');
-  cards.forEach(card=>{
-    card.style.display = !q ? 'block' : (card.innerText.toLowerCase().includes(q) ? 'block' : 'none');
-  });
-});
+        function closeNoteModal() {
+            document.getElementById('note-modal').style.display = 'none';
+            document.getElementById('note-title-input').value = '';
+            document.getElementById('note-content-input').value = '';
+        }
 
-/* auto-lock config */
-document.getElementById('auto-lock').addEventListener('change', ()=> scheduleAutoLock());
+        function saveNote() {
+            const title = document.getElementById('note-title-input').value;
+            const content = document.getElementById('note-content-input').value;
+            
+            if (title && content) {
+                notes.push({
+                    id: Date.now(),
+                    title,
+                    content,
+                    date: new Date().toLocaleDateString()
+                });
+                renderNotes();
+                closeNoteModal();
+            }
+        }
 
-/* activity resets auto-lock */
-['mousemove','keydown','click','touchstart'].forEach(ev=>{
-  window.addEventListener(ev, ()=> { lastActivity = Date.now(); if(unlocked) scheduleAutoLock(); });
-});
+        function createMarkdown() {
+            document.getElementById('notes-grid').style.display = 'none';
+            document.getElementById('markdown-editor').style.display = 'flex';
+            document.getElementById('doc-title').value = '';
+            document.getElementById('markdown-input').value = '';
+            document.getElementById('markdown-preview').innerHTML = '<p style="color: rgba(255,255,255,0.5);">A prévia aparecerá aqui...</p>';
+        }
 
-/* ---------- boot sequence ---------- */
-(async function boot(){
-  // if no salt present => first time
-  const salt = localStorage.getItem(STORAGE_SALT);
-  if(!salt){
-    document.getElementById('first-setup').style.display='block';
-    document.getElementById('login-area').style.display='none';
-    document.getElementById('lock-status').innerText='Configuração inicial';
-    return;
-  }else{
-    // show login area
-    document.getElementById('first-setup').style.display='none';
-    document.getElementById('login-area').style.display='block';
-    document.getElementById('master-pass').focus();
-  }
-})();
+        function closeEditor() {
+            document.getElementById('markdown-editor').style.display = 'none';
+            document.getElementById('notes-grid').style.display = 'grid';
+        }
 
-/* ---------- after unlock UI updates ---------- */
-function onUnlocked(){
-  document.getElementById('lock-status').innerText='Desbloqueado';
-  document.getElementById('modal-lock').style.display='none';
-  renderGrid();
-  scheduleAutoLock();
-}
+        function saveMarkdown() {
+            const title = document.getElementById('doc-title').value;
+            const content = document.getElementById('markdown-input').value;
+            
+            if (title && content) {
+                documents.push({
+                    id: Date.now(),
+                    title,
+                    content,
+                    date: new Date().toLocaleDateString()
+                });
+                alert('Documento salvo com sucesso!');
+                closeEditor();
+            }
+        }
 
-/* ---------- small 3D graph (visual only) ---------- */
-(function initThree(){
-  const canvas = document.getElementById('canvas3d');
-  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
-  renderer.setSize(canvas.clientWidth || canvas.width, 360);
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(60, (canvas.clientWidth||600)/360, 0.1, 2000); camera.position.set(0,0,120);
-  scene.add(new THREE.AmbientLight(0xffffff,0.9));
-  const geo = new THREE.BufferGeometry();
-  const pts = 200; const arr = new Float32Array(pts*3);
-  for(let i=0;i<pts;i++){ arr[i*3]= (Math.random()-0.5)*200; arr[i*3+1]=(Math.random()-0.5)*80; arr[i*3+2]=(Math.random()-0.5)*200; }
-  geo.setAttribute('position', new THREE.BufferAttribute(arr,3));
-  const points = new THREE.Points(geo, new THREE.PointsMaterial({size:1.8,color:0x8b5cf6,opacity:0.06,transparent:true}));
-  scene.add(points);
-  (function anim(){ requestAnimationFrame(anim); points.rotation.y += 0.0008; renderer.render(scene,camera); })();
-})();
+        document.getElementById('markdown-input').addEventListener('input', (e) => {
+            const markdown = e.target.value;
+            const preview = document.getElementById('markdown-preview');
+            preview.innerHTML = parseMarkdown(markdown);
+        });
 
-/* ---------- small utility: load decrypted from storage if unlocked already (edge case) ---------- */
-(async function tryAutoUnlockIfSessionActive(){
-  // If user used site earlier in same tab and key exists in memory, do nothing.
-  // Otherwise, we wait user to provide password.
-})();
+        function parseMarkdown(text) {
+            if (!text) return '<p style="color: rgba(255,255,255,0.5);">A prévia aparecerá aqui...</p>';
+            
+            let html = text;
+            
+            // Headers
+            html = html.replace(/^### (.*$)/gim, '<h3 style="color: #ff69b4; margin: 15px 0;">$1</h3>');
+            html = html.replace(/^## (.*$)/gim, '<h2 style="color: #ff69b4; margin: 20px 0;">$1</h2>');
+            html = html.replace(/^# (.*$)/gim, '<h1 style="color: #ff69b4; margin: 25px 0;">$1</h1>');
+            
+            // Bold
+            html = html.replace(/\*\*(.*?)\*\*/gim, '<strong style="color: #ba55d3;">$1</strong>');
+            
+            // Italic
+            html = html.replace(/\*(.*?)\*/gim, '<em>$1</em>');
+            
+            // Links
+            html = html.replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2" style="color: #ff69b4; text-decoration: underline;">$1</a>');
+            
+            // Code inline
+            html = html.replace(/`(.*?)`/gim, '<code style="background: rgba(255,105,180,0.2); padding: 2px 6px; border-radius: 4px; color: #fff;">$1</code>');
+            
+            // Lists
+            html = html.replace(/^\* (.*$)/gim, '<li style="margin-left: 20px;">$1</li>');
+            html = html.replace(/^\- (.*$)/gim, '<li style="margin-left: 20px;">$1</li>');
+            
+            // Line breaks
+            html = html.replace(/\n/gim, '<br>');
+            
+            return html;
+        }
 
-</script>
+        function showNotes() {
+            currentView = 'notes';
+            document.getElementById('markdown-editor').style.display = 'none';
+            document.getElementById('notes-grid').style.display = 'grid';
+            renderNotes();
+        }
+
+        function showDocuments() {
+            currentView = 'documents';
+            document.getElementById('markdown-editor').style.display = 'none';
+            document.getElementById('notes-grid').style.display = 'grid';
+            renderDocuments();
+        }
+
+        function renderDocuments() {
+            const grid = document.getElementById('notes-grid');
+            grid.innerHTML = documents.map(doc => `
+                <div class="note-card" onclick="openDocument(${doc.id})">
+                    <div class="note-title">📄 ${doc.title}</div>
+                    <div class="note-content">${doc.content.substring(0, 100)}${doc.content.length > 100 ? '...' : ''}</div>
+                    <div class="note-date">${doc.date}</div>
+                </div>
+            `).join('');
+            
+            if (documents.length === 0) {
+                grid.innerHTML = '<p style="color: rgba(255,255,255,0.5); grid-column: 1/-1; text-align: center; padding: 40px;">Nenhum documento ainda. Crie seu primeiro documento markdown!</p>';
+            }
+        }
+
+        function openDocument(id) {
+            const doc = documents.find(d => d.id === id);
+            if (doc) {
+                document.getElementById('notes-grid').style.display = 'none';
+                document.getElementById('markdown-editor').style.display = 'flex';
+                document.getElementById('doc-title').value = doc.title;
+                document.getElementById('markdown-input').value = doc.content;
+                document.getElementById('markdown-preview').innerHTML = parseMarkdown(doc.content);
+            }
+        }
+
+        function editNote(id) {
+            const note = notes.find(n => n.id === id);
+            if (note) {
+                document.getElementById('note-title-input').value = note.title;
+                document.getElementById('note-content-input').value = note.content;
+                openNewNoteModal();
+                
+                // Remove a nota antiga ao salvar
+                notes = notes.filter(n => n.id !== id);
+            }
+        }
+
+        function showArchived() {
+            const grid = document.getElementById('notes-grid');
+            grid.innerHTML = '<p style="color: rgba(255,255,255,0.5); grid-column: 1/-1; text-align: center; padding: 40px;">Nenhuma nota arquivada.</p>';
+        }
+
+        function toggleView() {
+            if (currentView === 'notes') {
+                showDocuments();
+            } else {
+                showNotes();
+            }
+        }
+
+        function searchNotes() {
+            const searchTerm = prompt('Digite o termo de busca:');
+            if (searchTerm) {
+                const filtered = notes.filter(note => 
+                    note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    note.content.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+                
+                const grid = document.getElementById('notes-grid');
+                if (filtered.length > 0) {
+                    grid.innerHTML = filtered.map(note => `
+                        <div class="note-card" onclick="editNote(${note.id})">
+                            <div class="note-title">${note.title}</div>
+                            <div class="note-content">${note.content.substring(0, 150)}${note.content.length > 150 ? '...' : ''}</div>
+                            <div class="note-date">${note.date}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    grid.innerHTML = '<p style="color: rgba(255,255,255,0.5); grid-column: 1/-1; text-align: center; padding: 40px;">Nenhum resultado encontrado.</p>';
+                }
+            }
+        }
+
+        function showMarkdown() {
+            createMarkdown();
+        }
+
+        // Atalhos de teclado
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + N - Nova nota
+            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                e.preventDefault();
+                openNewNoteModal();
+            }
+            
+            // Ctrl/Cmd + M - Novo markdown
+            if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
+                e.preventDefault();
+                createMarkdown();
+            }
+            
+            // Ctrl/Cmd + S - Salvar
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                if (document.getElementById('markdown-editor').style.display === 'flex') {
+                    saveMarkdown();
+                }
+            }
+            
+            // ESC - Fechar modais
+            if (e.key === 'Escape') {
+                closeNoteModal();
+                if (document.getElementById('markdown-editor').style.display === 'flex') {
+                    if (confirm('Deseja fechar sem salvar?')) {
+                        closeEditor();
+                    }
+                }
+            }
+        });
+
+        // Prevenir perda de dados
+        window.addEventListener('beforeunload', (e) => {
+            const markdownContent = document.getElementById('markdown-input').value;
+            if (markdownContent && document.getElementById('markdown-editor').style.display === 'flex') {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // Animação de shake para erro de senha
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+                20%, 40%, 60%, 80% { transform: translateX(10px); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Auto-save draft (usando memória)
+        let autosaveInterval;
+        document.getElementById('markdown-input').addEventListener('focus', () => {
+            autosaveInterval = setInterval(() => {
+                const title = document.getElementById('doc-title').value;
+                const content = document.getElementById('markdown-input').value;
+                if (content) {
+                    console.log('Auto-salvando rascunho...');
+                    // Em produção, isso salvaria em localStorage ou backend
+                }
+            }, 30000); // Auto-save a cada 30 segundos
+        });
+
+        document.getElementById('markdown-input').addEventListener('blur', () => {
+            if (autosaveInterval) {
+                clearInterval(autosaveInterval);
+            }
+        });
+
+        // Tema escuro permanente (já está no design)
+        console.log('🧪 Meu Universo X - Carregado com sucesso!');
+        console.log('💡 Dica: Use Ctrl+N para nova nota ou Ctrl+M para novo documento');
+    </script>
 </body>
 </html>

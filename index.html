@@ -1,525 +1,900 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Meu Universo X — Notas (Pergaminho Jiraiya Vertical)</title>
-<style>
-  /* ===== RESET & BASE ===== */
-  :root{
-    --bg1:#081226;
-    --paper1:#fbf3e6;
-    --paper2:#f0e4cf;
-    --wood-a:#5b2f2d;
-    --wood-b:#7a3d39;
-    --seal-red1:#e63b3b;
-    --accent1:#667eea;
-    --accent2:#764ba2;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{
-    font-family:Inter, "Segoe UI", Roboto, system-ui, -apple-system, Arial;
-    background: linear-gradient(180deg,var(--bg1),#061023 60%);
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    color:#0f1724; min-height:100vh; overflow:hidden;
-  }
-  #app{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Universo X</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  /* ===== PERGAMINHO VERTICAL (Jiraiya-inspired) =====
-     Timeline total: ~10s. Fall + unroll + seal + title + fade */
-  #scroll-animation{
-    position:fixed; inset:0; display:flex; align-items:flex-start; justify-content:center;
-    z-index:9999; pointer-events:none; background: radial-gradient(circle at 50% 6%, rgba(255,255,255,0.02), transparent 10%);
-  }
-  .scroll-wrapper{
-    width:520px; max-width:90vw; display:flex; flex-direction:column; align-items:center;
-    transform-origin: top center;
-    animation:scrollFall 1.7s cubic-bezier(.22,.9,.35,1) forwards;
-  }
-  @keyframes scrollFall{
-    0%{transform:translateY(-180vh) rotate(-6deg); opacity:0}
-    60%{transform:translateY(-6vh) rotate(-1deg); opacity:1}
-    88%{transform:translateY(0) rotate(0)}
-    100%{transform:translateY(0)}
-  }
+        body {
+            font-family: 'Google Sans', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-  .wood-roll.top{
-    width:96%; height:62px; border-radius:36px;
-    background: linear-gradient(90deg,var(--wood-a),var(--wood-b),#a0665d);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.5), inset 0 3px 10px rgba(255,255,255,0.08);
-    z-index:6; position:relative;
-  }
+        /* ==================== ANIMAÇÃO DO PERGAMINHO ==================== */
+        #scroll-intro {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, #0a0a15 0%, #000000 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 1.5s ease, visibility 1.5s ease;
+        }
 
-  .scroll-paper{
-    width:100%; height:0; overflow:hidden; position:relative; z-index:5;
-    background: linear-gradient(180deg,var(--paper1),var(--paper2));
-    border-left:8px solid rgba(139,115,85,0.14);
-    border-right:8px solid rgba(139,115,85,0.14);
-    box-shadow: inset 0 0 40px rgba(0,0,0,0.06), 0 10px 30px rgba(0,0,0,0.24);
-    animation:unrollVert 5.0s cubic-bezier(.18,.9,.28,1) 0.9s forwards;
-  }
+        #scroll-intro.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
 
-  @keyframes unrollVert{
-    0%{height:0}
-    60%{height:380px}   /* partial reveal */
-    100%{height:520px}  /* open enough for content */
-  }
+        .scroll-container {
+            position: relative;
+            width: 400px;
+            max-width: 85vw;
+            animation: scrollDrop 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
 
-  /* paper subtle grid / runes background to hint texture */
-  .scroll-paper::before{
-    content:""; position:absolute; inset:0;
-    background-image:
-      linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px),
-      linear-gradient(0deg, rgba(0,0,0,0.02) 1px, transparent 1px);
-    background-size: 18px 18px, 18px 18px;
-    opacity:0.12; pointer-events:none;
-  }
+        @keyframes scrollDrop {
+            0% {
+                transform: translateY(-200vh) rotate(-25deg);
+                opacity: 0;
+            }
+            40% {
+                opacity: 1;
+            }
+            70% {
+                transform: translateY(20px) rotate(5deg);
+            }
+            85% {
+                transform: translateY(-10px) rotate(-2deg);
+            }
+            100% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+        }
 
-  /* runic ring & seal container centered vertically in the paper */
-  .scroll-inner{
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none;
-    opacity:0; transform:translateY(10px); animation:innerReveal 1s ease 4.6s forwards;
-  }
-  @keyframes innerReveal{ to{opacity:1; transform:translateY(0)} }
+        /* Rolos de madeira superiores */
+        .wood-top, .wood-bottom {
+            width: 100%;
+            height: 45px;
+            background: linear-gradient(180deg, 
+                #3d2817 0%, 
+                #5d4037 20%, 
+                #6d4c41 40%, 
+                #5d4037 60%, 
+                #4e342e 80%, 
+                #3d2817 100%);
+            border-radius: 22px;
+            position: relative;
+            box-shadow: 
+                0 6px 20px rgba(0,0,0,0.8),
+                inset 0 2px 8px rgba(255,255,255,0.15),
+                inset 0 -3px 8px rgba(0,0,0,0.4);
+        }
 
-  /* Runes ring — we create an SVG circle of faux runes (decorative) */
-  .runes-svg{ width:260px; height:260px; transform-origin:center center; animation:runesPulse 1.2s ease 4.9s forwards; }
-  @keyframes runesPulse{ 0%{transform:scale(.8)} 70%{transform:scale(1.05)} 100%{transform:scale(1)} }
+        .wood-top::before, .wood-bottom::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            height: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255,255,255,0.1) 50%, 
+                transparent 100%);
+            border-radius: 20px;
+        }
 
-  /* SEAL (red circular) */
-  .seal{
-    position:absolute; width:140px; height:140px; border-radius:999px; z-index:8;
-    display:flex;align-items:center;justify-content:center; pointer-events:none;
-    background: radial-gradient(circle at 30% 25%, #ff6b6b, #c62828 60%, #8b1515 100%);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.45), inset 0 3px 10px rgba(255,255,255,0.12);
-    opacity:0; transform:scale(0) rotate(0); animation:sealPop .65s cubic-bezier(.2,.95,.2,1.05) 5.3s forwards, sealSpin 9s linear 5.9s infinite;
-  }
-  @keyframes sealPop{ 0%{transform:scale(0); opacity:0} 60%{transform:scale(1.25); opacity:1} 100%{transform:scale(1)} }
-  @keyframes sealSpin{ 0%{transform:scale(1) rotate(0deg)} 100%{transform:scale(1) rotate(360deg)} }
-  .seal .kanji{ color:#fdeedc; font-weight:800; font-size:44px; text-shadow:1px 1px 4px rgba(0,0,0,0.4) }
+        /* Corda do pergaminho */
+        .scroll-rope {
+            position: absolute;
+            width: 8px;
+            height: 0;
+            background: linear-gradient(180deg, #8b6f47 0%, #6d5939 100%);
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+            animation: ropeAppear 1.5s ease-out 3s forwards;
+        }
 
-  /* X em estilo brush: SVG com traços largos */
-  .x-svg{ width:110px; height:110px; position:relative; z-index:9; opacity:0; transform:translateY(8px) scale(.95);
-    animation:xIn 0.8s ease 5.6s forwards;
-  }
-  @keyframes xIn{ to{opacity:1; transform:translateY(0) scale(1)} }
+        @keyframes ropeAppear {
+            0% { height: 0; }
+            100% { height: 40px; }
+        }
 
-  /* FADE OUT whole scroll to reveal login: triggers ~7s -> finish ~8s to give 10s feel */
-  #scroll-animation.fadeout{ animation:scrollFade 1s ease 6.8s forwards; }
-  @keyframes scrollFade{ 0%{opacity:1} 100%{opacity:0; visibility:hidden} }
+        /* Papel do pergaminho */
+        .scroll-paper {
+            width: 100%;
+            height: 0;
+            background: linear-gradient(180deg, 
+                #f5e6d3 0%, 
+                #ede0ce 15%, 
+                #f2e4d0 30%, 
+                #ede0ce 50%, 
+                #f2e4d0 70%, 
+                #ede0ce 85%, 
+                #f5e6d3 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                inset 0 0 40px rgba(0,0,0,0.08),
+                8px 0 20px rgba(0,0,0,0.3),
+                -8px 0 20px rgba(0,0,0,0.3);
+            animation: unrollScroll 4s ease-in-out 3.5s forwards;
+        }
 
-  /* bottom wood roll */
-  .wood-roll.bottom{
-    width:96%; height:62px; border-radius:36px; margin-top:6px;
-    background: linear-gradient(90deg,#4b2725,#6a3c39,#8b5f58);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.4), inset 0 -3px 10px rgba(255,255,255,0.06);
-  }
+        @keyframes unrollScroll {
+            0% { height: 0; }
+            100% { height: 600px; }
+        }
 
-  /* ===== LOGIN CARD ===== */
-  #login-screen{ position:relative; z-index:60; width:100%; max-width:600px; opacity:0; transform:translateY(12px) scale(.99); transition:all .45s ease; margin-top:18px; display:flex; justify-content:center }
-  #login-screen.visible{ opacity:1; transform:translateY(0) scale(1) }
-  .login-card{ background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,250,0.98)); border-radius:18px; padding:18px; width:96%; max-width:520px; box-shadow: 0 22px 60px rgba(2,8,23,0.45); }
-  .login-title{ font-size:22px; font-weight:800; text-align:center; margin-bottom:6px }
-  .login-sub{ text-align:center; color:#546273; font-size:13px; margin-bottom:8px }
+        /* Textura de papel envelhecido */
+        .scroll-paper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(139,115,85,0.02) 1px, rgba(139,115,85,0.02) 2px),
+                repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(139,115,85,0.02) 1px, rgba(139,115,85,0.02) 2px);
+            opacity: 0.5;
+        }
 
-  .field{ display:flex; flex-direction:column; gap:6px }
-  label{ font-size:13px; font-weight:700; color:#24323f }
-  input[type="password"]{ padding:12px;border-radius:10px;border:2px solid #e6e6e6; font-size:15px; outline:none }
-  input[type="password"]:focus{ border-color:#6e8de8; box-shadow:0 6px 18px rgba(102,126,234,0.12) }
-  .btn{ margin-top:8px;padding:12px;border-radius:12px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--accent1),var(--accent2)); color:#fff; font-weight:800; font-size:15px }
+        /* Bordas queimadas */
+        .scroll-paper::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-left: 2px solid rgba(101,67,33,0.3);
+            border-right: 2px solid rgba(101,67,33,0.3);
+        }
 
-  .error{ display:none; background:#fee;padding:10px;border-left:4px solid #c33;color:#8a1b1b;border-radius:8px; margin-top:8px; text-align:center }
+        /* Conteúdo central do pergaminho */
+        .scroll-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%;
+            opacity: 0;
+            animation: contentFade 2s ease 7.5s forwards;
+        }
 
-  /* ===== NOTES APP (Keep-like) ===== */
-  #notes-app{ display:none; position:relative; z-index:50; width:100%; max-width:1120px; margin:20px auto; }
-  #notes-app.active{ display:block }
+        @keyframes contentFade {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
 
-  .topbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px }
-  .brand{ display:flex; align-items:center; gap:12px }
-  .logo{ width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent1),var(--accent2)); color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:20px; box-shadow: 0 10px 30px rgba(2,8,23,0.12) }
-  .brand h2{ font-size:18px; font-weight:800 }
+        /* Círculo de runas ninja */
+        .rune-circle {
+            width: 280px;
+            height: 280px;
+            margin: 0 auto;
+            position: relative;
+        }
 
-  .controls{ display:flex; gap:10px; align-items:center }
+        .rune-circle svg {
+            width: 100%;
+            height: 100%;
+            animation: rotateRunes 20s linear infinite;
+        }
 
-  .search{ padding:10px 12px;border-radius:12px;border:2px solid #e6e6e6; width:240px; outline:none }
-  .create-note{ padding:10px 14px;border-radius:12px;border:2px dashed rgba(0,0,0,0.06); background:linear-gradient(180deg,#fff,#fbfbfb); display:flex; gap:10px; align-items:center; cursor:pointer; min-width:220px }
+        @keyframes rotateRunes {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
-  .grid{ display:grid; grid-template-columns: repeat(auto-fill,minmax(240px,1fr)); gap:16px }
+        /* X central estilo brush japonês */
+        .center-x {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 120px;
+            font-weight: 900;
+            color: #1a1a1a;
+            text-shadow: 
+                3px 3px 0 rgba(200,0,0,0.3),
+                -2px -2px 0 rgba(0,0,0,0.2);
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            letter-spacing: -10px;
+            animation: xPulse 3s ease-in-out infinite;
+        }
 
-  .note{ background:#fff;border-radius:12px;padding:12px;min-height:110px;display:flex;flex-direction:column;gap:8px; box-shadow:0 8px 30px rgba(2,8,23,0.06) }
-  .title{ font-weight:800; font-size:15px; outline:none }
-  .content{ font-size:14px; color:#1f2937; flex:1; outline:none; white-space:pre-wrap; overflow:auto }
+        @keyframes xPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+        }
 
-  .note-footer{ display:flex; justify-content:space-between; align-items:center; gap:8px }
-  .note-actions{ display:flex; gap:8px; align-items:center }
+        /* Título do universo */
+        .universe-title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            color: #2c1810;
+            margin-top: 30px;
+            letter-spacing: 6px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            opacity: 0;
+            animation: titleFade 1.5s ease 9s forwards;
+        }
 
-  .clr-0{ background:#fff }
-  .clr-1{ background:#fff7c0 }
-  .clr-2{ background:#ffd6b6 }
-  .clr-3{ background:#fddaf6 }
-  .clr-4{ background:#d7facc }
+        @keyframes titleFade {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
 
-  @media (max-width:680px){
-    .scroll-wrapper{ width:92vw }
-    .search{ width:120px }
-    .brand h2{ display:none }
-  }
-</style>
+        /* ==================== TELA DE LOGIN ==================== */
+        #login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1.5s ease, visibility 1.5s ease;
+            z-index: 9999;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        #login-screen.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .login-box {
+            background: white;
+            padding: 50px 40px;
+            border-radius: 24px;
+            box-shadow: 0 30px 90px rgba(0,0,0,0.4);
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .login-box h1 {
+            font-size: 32px;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .login-box p {
+            color: #7f8c8d;
+            margin-bottom: 35px;
+            font-size: 14px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 18px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .input-wrapper input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102,126,234,0.4);
+        }
+
+        .error-msg {
+            background: #fee;
+            color: #c33;
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border-left: 4px solid #c33;
+            display: none;
+            animation: shake 0.5s;
+        }
+
+        .error-msg.show {
+            display: block;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-12px); }
+            75% { transform: translateX(12px); }
+        }
+
+        /* ==================== APP DE NOTAS (Google Keep Style) ==================== */
+        #app {
+            display: none;
+            min-height: 100vh;
+            background: #fff;
+        }
+
+        #app.active {
+            display: block;
+        }
+
+        /* Header do App */
+        .app-header {
+            background: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .app-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-logo h1 {
+            font-size: 24px;
+            color: #5f6368;
+            font-weight: 400;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .search-bar {
+            padding: 12px 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            width: 300px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-bar:focus {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.15);
+        }
+
+        .btn-icon {
+            padding: 10px 16px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #5f6368;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon:hover {
+            background: #f1f3f4;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 24px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102,126,234,0.3);
+        }
+
+        /* Container de notas */
+        .notes-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .new-note-box {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .new-note-box:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        .new-note-input {
+            border: none;
+            outline: none;
+            font-size: 16px;
+            color: #5f6368;
+            width: 100%;
+        }
+
+        /* Grid de notas */
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .note-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .note-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .note-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--note-color, #667eea);
+        }
+
+        .note-card.yellow::before { background: #fbbc04; }
+        .note-card.red::before { background: #ea4335; }
+        .note-card.blue::before { background: #4285f4; }
+        .note-card.green::before { background: #34a853; }
+        .note-card.purple::before { background: #a142f4; }
+
+        .note-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #202124;
+            margin-bottom: 8px;
+            word-wrap: break-word;
+        }
+
+        .note-content {
+            font-size: 14px;
+            color: #5f6368;
+            line-height: 1.6;
+            word-wrap: break-word;
+            max-height: 200px;
+            overflow: hidden;
+        }
+
+        .note-date {
+            font-size: 12px;
+            color: #80868b;
+            margin-top: 12px;
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .note-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-edit {
+            background: #e8f0fe;
+            color: #1967d2;
+        }
+
+        .btn-edit:hover {
+            background: #d2e3fc;
+        }
+
+        .btn-delete {
+            background: #fce8e6;
+            color: #c5221f;
+        }
+
+        .btn-delete:hover {
+            background: #f4c7c3;
+        }
+
+        .btn-share {
+            background: #e6f4ea;
+            color: #137333;
+        }
+
+        .btn-share:hover {
+            background: #ceead6;
+        }
+
+        /* Modal de edição */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 32px;
+            box-shadow: 0 24px 48px rgba(0,0,0,0.3);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 24px;
+            color: #202124;
+            font-size: 24px;
+        }
+
+        .modal-content input,
+        .modal-content textarea {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .modal-content input:focus,
+        .modal-content textarea:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+
+        .modal-content textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .color-option:hover,
+        .color-option.active {
+            border-color: #333;
+            transform: scale(1.15);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn-cancel {
+            padding: 12px 24px;
+            border: 1px solid #dadce0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #5f6368;
+            transition: all 0.3s;
+        }
+
+        .btn-cancel:hover {
+            background: #f1f3f4;
+        }
+
+        .btn-save {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102,126,234,0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #5f6368;
+        }
+
+        .empty-state h2 {
+            font-size: 28px;
+            margin-bottom: 12px;
+            font-weight: 400;
+        }
+
+        /* Menu de compartilhamento */
+        .share-menu {
+            position: absolute;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            padding: 8px;
+            z-index: 200;
+            display: none;
+            min-width: 180px;
+        }
+
+        .share-menu.show {
+            display: block;
+        }
+
+        .share-option {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            font-size: 14px;
+            color: #5f6368;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .share-option:hover {
+            background: #f1f3f4;
+        }
+
+        @media (max-width: 768px) {
+            .search-bar {
+                width: 200px;
+            }
+
+            .notes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .app-logo h1 {
+                font-size: 18px;
+            }
+
+            .rune-circle {
+                width: 220px;
+                height: 220px;
+            }
+
+            .center-x {
+                font-size: 90px;
+            }
+
+            .universe-title {
+                font-size: 24px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div id="app">
-    <!-- PERGAMINHO VERTICAL -->
-    <div id="scroll-animation" aria-hidden="true">
-      <div class="scroll-wrapper" role="img" aria-label="Pergaminho de abertura vertical estilo Jiraiya">
-        <div class="wood-roll top" aria-hidden="true"></div>
-
-        <div class="scroll-paper" aria-hidden="true">
-          <div class="scroll-inner" aria-hidden="true">
-            <!-- Runes ring - decorative SVG -->
-            <svg class="runes-svg" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <defs>
-                <path id="glyph" d="M1 0c2 3 6 3 9 0" />
-              </defs>
-              <g transform="translate(130,130)">
-                <!-- many small rotated glyphs to simulate runes -->
-                <!-- we'll draw 32 glyphs on circle -->
-                <g id="runes">
-                  <!-- generate visually by hand-placed glyphs -->
-                  <!-- these are simple decorative strokes -->
-                  <g fill="#111" transform="translate(-6,-6) scale(1.2)">
-                    <path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/>
-                  </g>
-                </g>
-                <!-- repeated copies around circle -->
-                <g id="ring">
-                  <!-- we draw using JS-like duplication via multiple path elements manually rotated -->
-                  <!-- simplified decorative ring made of small strokes -->
-                  <g>
-                    <!-- generate 24 strokes -->
-                    <!-- using inline paths rotated -->
-                    <!-- to keep code compact, we'll place them on circle -->
-                    <!-- rotation increments 15deg -->
-                    <g transform="rotate(0) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(15) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(30) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(45) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(60) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(75) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(90) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(105) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(120) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(135) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(150) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(165) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-
-                    <g transform="rotate(180) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(195) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(210) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(225) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(240) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(255) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(270) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(285) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(300) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(315) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(330) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                    <g transform="rotate(345) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-                  </g>
-                </g>
-                <!-- subtle circle -->
-                <circle r="78" fill="none" stroke="rgba(12,12,12,0.06)" stroke-width="8"/>
-              </g>
-            </svg>
-
-            <!-- seal -->
-            <div class="seal" aria-hidden="true"><div class="kanji">封</div></div>
-
-            <!-- X brush style using SVG thick strokes -->
-            <svg class="x-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <g stroke="#0b0b0b" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-width="10">
-                <path d="M20 20 L80 80" stroke-width="12" stroke-linecap="round"/>
-                <path d="M80 20 L20 80" stroke-width="12" stroke-linecap="round"/>
-              </g>
-            </svg>
-          </div>
+    <!-- ANIMAÇÃO DO PERGAMINHO -->
+    <div id="scroll-intro">
+        <div class="scroll-container">
+            <div class="scroll-rope"></div>
+            <div class="wood-top"></div>
+            <div class="scroll-paper">
+                <div class="scroll-content">
+                    <div class="rune-circle">
+                        <svg viewBox="0 0 200 200">
+                            <circle cx="100" cy="100" r="90" fill="none" stroke="#2c1810" stroke-width="2" opacity="0.3"/>
+                            <circle cx="100" cy="100" r="80" fill="none" stroke="#2c1810" stroke-width="1" opacity="0.2"/>
+                            <text font-size="12" fill="#2c1810" opacity="0.6">
+                                <textPath href="#circlePath" startOffset="0%">
+                                    風 火 水 土 雷 陰 陽 封 印 術 忍 道 龍 虎 鳳 凰
+                                </textPath>
+                            </text>
+                            <path id="circlePath" d="M 100, 100 m -85, 0 a 85,85 0 1,1 170,0 a 85,85 0 1,1 -170,0" fill="none"/>
+                        </svg>
+                        <div class="center-x">X</div>
+                    </div>
+                    <div class="universe-title">MEU UNIVERSO X</div>
+                </div>
+            </div>
+            <div class="wood-bottom"></div>
         </div>
-
-        <div class="wood-roll bottom" aria-hidden="true"></div>
-      </div>
     </div>
 
-    <!-- LOGIN -->
-    <div id="login-screen" aria-labelledby="login-title">
-      <div class="login-card">
-        <div class="login-title" id="login-title">🔐 Acesso Seguro — Meu Universo X</div>
-        <div class="login-sub">Digite a senha para abrir o aplicativo</div>
-        <div id="login-error" class="error">Senha incorreta</div>
-
-        <div class="field">
-          <label for="password">Senha</label>
-          <input id="password" type="password" autocomplete="off" placeholder="••••••" />
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen">
+        <div class="login-box">
+            <h1>🔐 Acesso Seguro</h1>
+            <p>Digite sua senha ninja para acessar</p>
+            <div class="error-msg" id="error-msg">
+                ❌ Senha incorreta! Tente novamente.
+            </div>
+            <div class="input-wrapper">
+                <input type="password" id="password-input" placeholder="Digite sua senha" autocomplete="off">
+            </div>
+            <button class="login-btn" id="login-btn">Entrar</button>
+            <p style="margin-top: 20px; font-size: 12px; color: #95a5a6;">💡 Senha: meuuniversox</p>
         </div>
-        <button id="login-btn" class="btn">Entrar</button>
-        <div style="margin-top:6px; text-align:center; color:#76808a; font-size:13px">Dica: senha padrão no código (podes alterar)</div>
-      </div>
     </div>
 
-    <!-- NOTES APP -->
-    <main id="notes-app" aria-live="polite">
-      <div class="topbar">
-        <div class="brand">
-          <div class="logo">X</div>
-          <div>
-            <h2>Meu Universo X</h2>
-            <div style="color:#6b7280;font-size:13px">Bloco de notas — estilo Keep • Offline</div>
-          </div>
+    <!-- APP DE NOTAS -->
+    <div id="app">
+        <div class="app-header">
+            <div class="app-logo">
+                <div class="logo-icon">X</div>
+                <h1>Meu Universo X</h1>
+            </div>
+            <div class="header-actions">
+                <input type="text" class="search-bar" id="search-input" placeholder="🔍 Buscar notas...">
+                <button class="btn-icon" id="logout-btn">🚪 Sair</button>
+            </div>
         </div>
 
-        <div class="controls">
-          <input id="search" class="search" placeholder="Pesquisar notas..." />
-          <div id="create" class="create-note" title="Criar nova nota">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#374151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <div style="font-weight:700;color:#374151">Nova nota</div>
-          </div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button id="exportAllBtn" class="btn" title="Exportar todas as notas (JSON)">Exportar JSON</button>
-            <label><input id="importFile" type="file" accept="application/json" style="display:none"/><button class="btn" onclick="document.getElementById('importFile').click()">Importar JSON</button></label>
-            <input id="driveToken" placeholder="Token Drive (opcional)" style="min-width:220px;padding:8px;border-radius:8px;border:1px solid #e6e6e6"/>
-            <button id="uploadDriveBtn" class="btn">Upload Drive</button>
-            <button id="downloadAllBtn" class="btn" style="background:linear-gradient(135deg,#22c1c3,#2e9fff)">Download JSON</button>
-          </div>
+        <div class="notes-container">
+            <div class="new-note-box" id="new-note-trigger">
+                <input type="text" class="new-note-input" placeholder="✍️ Criar uma nota..." readonly>
+            </div>
+
+            <div class="notes-grid" id="notes-grid"></div>
         </div>
-      </div>
+    </div>
 
-      <section id="notes-grid" class="grid" aria-label="Notas"></section>
-    </main>
-
-  </div>
-
-<script>
-/* ================== CONFIG ================== */
-const PASSWORD = 'meuuniversox';
-const STORAGE_KEY = 'meuuniversox_notes_v1';
-const COLORS = ['clr-0','clr-1','clr-2','clr-3','clr-4'];
-
-/* ===== Elements ===== */
-const scrollAnim = document.getElementById('scroll-animation');
-const loginScreen = document.getElementById('login-screen');
-const loginBtn = document.getElementById('login-btn');
-const passwordInput = document.getElementById('password');
-const loginError = document.getElementById('login-error');
-
-const notesApp = document.getElementById('notes-app');
-const createBtn = document.getElementById('create');
-const notesGrid = document.getElementById('notes-grid');
-const searchInput = document.getElementById('search');
-const exportAllBtn = document.getElementById('exportAllBtn');
-const importFile = document.getElementById('importFile');
-const downloadAllBtn = document.getElementById('downloadAllBtn');
-const driveTokenInput = document.getElementById('driveToken');
-const uploadDriveBtn = document.getElementById('uploadDriveBtn');
-
-let NOTES = [];
-
-/* ===== Intro timing (approx 10s feel) ===== */
-setTimeout(()=> {
-  scrollAnim.classList.add('fadeout');
-  setTimeout(()=> loginScreen.classList.add('visible'), 700);
-}, 6200);
-setTimeout(()=> passwordInput.focus(), 7000);
-
-/* ===== Login logic ===== */
-function showError(msg){ loginError.textContent = msg || 'Senha incorreta'; loginError.style.display = 'block'; setTimeout(()=> loginError.style.display = 'none', 2200); }
-loginBtn.addEventListener('click', tryLogin);
-passwordInput.addEventListener('keydown', (e)=> { if(e.key === 'Enter') tryLogin(); });
-
-function tryLogin(){
-  const val = (passwordInput.value || '').trim();
-  if(val === PASSWORD){
-    loginScreen.style.transition = 'all .4s ease';
-    loginScreen.style.opacity = '0';
-    loginScreen.style.transform = 'translateY(8px) scale(.98)';
-    setTimeout(()=> { loginScreen.style.display = 'none'; openNotesApp(); }, 450);
-  } else {
-    showError('Senha incorreta'); passwordInput.value = ''; passwordInput.focus();
-  }
-}
-
-/* ===== Notes store ===== */
-function loadNotes(){ try{ const raw = localStorage.getItem(STORAGE_KEY); NOTES = raw ? JSON.parse(raw) : []; }catch(e){ NOTES = []; } }
-function saveNotes(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(NOTES)); }
-
-/* create note */
-function createNote(initial={title:'',content:'',color:COLORS[0]}) {
-  const note = { id:'n_'+Date.now()+'_'+Math.floor(Math.random()*9999), title:initial.title||'', content:initial.content||'', color:initial.color||COLORS[0], updated:Date.now() };
-  NOTES.unshift(note); saveNotes(); renderNotes();
-  setTimeout(()=> { const el = document.querySelector(`[data-id="${note.id}"]`); if(el){ el.querySelector('.title').focus(); placeCaretAtEnd(el.querySelector('.title')); } }, 120);
-}
-
-/* render notes */
-function renderNotes(filter='') {
-  notesGrid.innerHTML = '';
-  const q = (filter||'').toLowerCase().trim();
-  NOTES.forEach(note => {
-    if(q){ const t = (note.title||'') + ' ' + (note.content||''); if(!t.toLowerCase().includes(q)) return; }
-    const card = document.createElement('article');
-    card.className = 'note ' + note.color;
-    card.dataset.id = note.id;
-    card.innerHTML = `
-      <div contenteditable="true" class="title">${escapeHtml(note.title)}</div>
-      <div contenteditable="true" class="content">${escapeHtml(note.content)}</div>
-      <div class="note-footer">
-        <div style="font-size:12px;color:#6b7280">Atualizada ${timeAgo(note.updated)}</div>
-        <div class="note-actions">
-          <select class="color-select">
-            <option value="clr-0">Branco</option>
-            <option value="clr-1">Amarelo</option>
-            <option value="clr-2">Laranja</option>
-            <option value="clr-3">Rosa</option>
-            <option value="clr-4">Verde</option>
-          </select>
-          <button class="icon-btn btn-share-email" title="Partilhar por Email">✉️</button>
-          <button class="icon-btn btn-share-ws" title="Partilhar por WhatsApp">💬</button>
-          <button class="icon-btn btn-download-txt" title="Descarregar nota">⬇️</button>
-          <button class="icon-btn btn-export-json" title="Exportar nota (JSON)">📤</button>
-          <button class="icon-btn btn-delete" title="Excluir">🗑️</button>
+    <!-- MODAL DE EDIÇÃO -->
+    <div class="modal" id="note-modal">
+        <div class="modal-content">
+            <h2 id="modal-title">Nova Nota</h2>
+            <input type="text" id="note-title-input" placeholder="Título">
+            <textarea id="note-content-input" placeholder="Criar uma nota..."></textarea>
+            <div class="color-picker">
+                <div class="color-option active" style="background: #667eea" data-color="default"></div>
+                <div class="color-option" style="background: #fbbc04" data-color="yellow"></div>
+                <div class="color-option" style="background: #ea4335" data-color="red"></div>
+                <div class="color-option" style="background: #4285f4" data-color="blue"></div>
+                <div class="color-option" style="background: #34a853" data-color="green"></div>
+                <div class="color-option" style="background: #a142f4" data-color="purple"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="cancel-btn">Cancelar</button>
+                <button class="btn-save" id="save-btn">Salvar</button>
+            </div>
         </div>
-      </div>
-    `;
-    const select = card.querySelector('.color-select');
-    select.value = note.color;
-    const titleEl = card.querySelector('.title');
-    const contentEl = card.querySelector('.content');
+    </div>
 
-    titleEl.addEventListener('input', ()=> debounceSave(note.id, titleEl, contentEl, select));
-    contentEl.addEventListener('input', ()=> debounceSave(note.id, titleEl, contentEl, select));
-    select.addEventListener('change', ()=> { note.color = select.value; note.updated = Date.now(); saveNotes(); renderNotes(searchInput.value); });
+    <script>
+        // ==================== CONFIGURAÇÕES ====================
+        const PASSWORD = 'meuuniversox';
+        let notes = [];
+        let currentNoteId = null;
+        let selectedColor = 'default';
 
-    card.querySelector('.btn-delete').addEventListener('click', ()=> { if(confirm('Excluir nota?')){ NOTES = NOTES.filter(n=>n.id !== note.id); saveNotes(); renderNotes(searchInput.value); }});
+        // ==================== ELEMENTOS ====================
+        const scrollIntro = document.getElementById('scroll-intro');
+        const loginScreen = document.getElementById('login-screen');
+        const passwordInput = document.getElementById('password-input');
+        const loginBtn = document.getElementById('login-btn');
+        const errorMsg = document.getElementById('error-msg');
+        const app = document.getElementById('app');
+        const notesGrid = document.getElementById('notes-grid');
+        const noteModal = document.getElementById('note-modal');
+        const newNoteTrigger = document.getElementById('new-note-trigger');
+        const searchInput = document.getElementById('search-input');
+        const logoutBtn = document.getElementById('logout-btn');
 
-    card.querySelector('.btn-share-email').addEventListener('click', ()=> {
-      const subject = encodeURIComponent(note.title || 'Nota - Meu Universo X');
-      const body = encodeURIComponent((note.title? note.title + '\n\n':'') + note.content);
-      window.location.href = `mailto:?subject=${subject}&body=${body}`;
-    });
-
-    card.querySelector('.btn-share-ws').addEventListener('click', ()=> {
-      const text = encodeURIComponent((note.title? note.title + '\n\n':'') + note.content);
-      const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-      const waUrl = mobile ? `whatsapp://send?text=${text}` : `https://web.whatsapp.com/send?text=${text}`;
-      window.open(waUrl, '_blank');
-    });
-
-    card.querySelector('.btn-download-txt').addEventListener('click', ()=> {
-      const blob = new Blob([ (note.title? note.title + '\n\n' : '') + note.content ], { type: 'text/plain;charset=utf-8' });
-      const name = (note.title || 'nota').replace(/[^\w\s\-]/gi,'').slice(0,40) || 'nota';
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${name}.txt`; document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(()=> URL.revokeObjectURL(a.href), 5000);
-    });
-
-    card.querySelector('.btn-export-json').addEventListener('click', ()=> {
-      const data = JSON.stringify([note], null, 2);
-      const blob = new Blob([data], { type: 'application/json' });
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${(note.title||'nota').replace(/[^\w\s\-]/gi,'').slice(0,40)}.json`; document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(()=> URL.revokeObjectURL(a.href), 5000);
-    });
-
-    notesGrid.appendChild(card);
-  });
-}
-
-/* helpers */
-function escapeHtml(str){ if(!str) return ''; return str.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-function timeAgo(ts){ const s = Math.floor((Date.now()-ts)/1000); if(s<60) return `${s}s`; if(s<3600) return `${Math.floor(s/60)}m`; if(s<86400) return `${Math.floor(s/3600)}h`; return `${Math.floor(s/86400)}d`; }
-function placeCaretAtEnd(el){ el.focus(); if(window.getSelection && document.createRange){ const range=document.createRange(); range.selectNodeContents(el); range.collapse(false); const sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(range); } }
-
-let saveTimeouts = {};
-function debounceSave(id, titleEl, contentEl, select){
-  clearTimeout(saveTimeouts[id]);
-  saveTimeouts[id] = setTimeout(()=> {
-    const note = NOTES.find(n=>n.id === id);
-    if(note){
-      note.title = titleEl.innerText.trim();
-      note.content = contentEl.innerText.trim();
-      note.color = select.value;
-      note.updated = Date.now();
-      saveNotes();
-      renderNotes(searchInput.value);
-    }
-  }, 500);
-}
-
-/* create / load / save */
-function loadNotes(){ try{ const raw = localStorage.getItem(STORAGE_KEY); NOTES = raw ? JSON.parse(raw) : []; }catch(e){ NOTES = []; } }
-function saveNotes(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(NOTES)); }
-function ensureNotes(){ if(NOTES.length === 0) createNote({title:'Bem-vindo ao Meu Universo X', content:'As tuas notas ficam guardadas localmente. Usa os botões para partilhar e exportar.', color:COLORS[0]}); }
-
-/* open notes app */
-function openNotesApp(){ loadNotes(); ensureNotes(); renderNotes(); notesApp.classList.add('active'); document.body.style.overflow='auto'; notesApp.style.opacity='0'; notesApp.style.transform='translateY(8px)'; setTimeout(()=>{ notesApp.style.transition='all .48s ease'; notesApp.style.opacity='1'; notesApp.style.transform='translateY(0)'; }, 60); }
-
-/* interactions */
-createBtn.addEventListener('click', ()=> createNote({title:'', content:'', color:COLORS[0]}));
-searchInput.addEventListener('input', ()=> renderNotes(searchInput.value));
-document.addEventListener('keydown', (e)=> { if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='n'){ e.preventDefault(); createNote({title:'',content:'',color:COLORS[0]}); } });
-
-/* export/import/download all */
-exportAllBtn.addEventListener('click', ()=> {
-  loadNotes();
-  const data = JSON.stringify(NOTES, null, 2);
-  const blob = new Blob([data], { type: 'application/json' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = `meuuniversox_notas_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=> URL.revokeObjectURL(a.href), 5000);
-});
-downloadAllBtn.addEventListener('click', ()=> exportAllBtn.click());
-
-importFile.addEventListener('change', (ev)=>{
-  const file = ev.target.files && ev.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e){
-    try{
-      const parsed = JSON.parse(e.target.result);
-      if(!Array.isArray(parsed)) throw new Error('Ficheiro inválido');
-      const existing = new Set(NOTES.map(n=>n.id));
-      parsed.forEach(p=>{
-        if(!p.id) p.id='n_'+Date.now()+'_'+Math.floor(Math.random()*9999);
-        if(existing.has(p.id)) p.id='n_'+Date.now()+'_'+Math.floor(Math.random()*9999);
-        NOTES.unshift(p);
-      });
-      saveNotes(); renderNotes(); alert('Importação concluída');
-    }catch(err){ alert('Falha a importar: ' + err.message); }
-  };
-  reader.readAsText(file);
-  ev.target.value = '';
-});
-
-/* Google Drive upload (optional) */
-uploadDriveBtn.addEventListener('click', async ()=>{
-  const token = (driveTokenInput.value || '').trim(); if(!token){ alert('Cole um Access Token do Drive no campo e tenta novamente, ou exporta JSON e carrega manualmente.'); return; }
-  loadNotes();
-  const data = JSON.stringify(NOTES, null, 2);
-  const metadata = { name: `meuuniversox_notas_${new Date().toISOString().slice(0,10)}.json`, mimeType: 'application/json' };
-  try{
-    const boundary = '-------X' + Math.random().toString(36).slice(2);
-    let multipart = '';
-    multipart += `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n`;
-    multipart += `--${boundary}\r\nContent-Type: application/json\r\n\r\n${data}\r\n`;
-    multipart += `--${boundary}--\r\n`;
-    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-      method:'POST',
-      headers:{ 'Authorization':'Bearer '+token, 'Content-Type':'multipart/related; boundary=' + boundary },
-      body: multipart
-    });
-    if(!res.ok){ const txt = await res.text(); throw new Error('Erro upload: '+res.status+' — '+txt.slice(0,200)); }
-    const result = await res.json(); alert('Upload concluído! Drive file: ' + (result.name || result.id));
-  }catch(err){ alert('Falha no upload: ' + err.message + '\nSe não conseguires usar token, exporta JSON e carrega manualmente no Drive.'); }
-});
-
-/* initial load (notes kept in localStorage; login still required) */
-loadNotes();
-</script>
-</body>
-</html>
+        // ==================== ANIMAÇÃO INICIAL ====================
+        setTimeout(() => {
+            scrollIntro.classList.add('hidden');
+            setTimeout(() => {
+                loginScreen.classList.add('visible');
+                passwordInput.focus();

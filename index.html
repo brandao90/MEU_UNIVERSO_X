@@ -1,114 +1,252 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Meu Universo X — Notas</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Meu Universo X — Notas (Pergaminho Jiraiya Vertical)</title>
 <style>
-/* ===== RESET / BASE ===== */
-:root{
-  --bg1:#081126; --paper1:#f5e6d3; --accent1:#667eea; --accent2:#764ba2;
-  --card-shadow: 0 10px 40px rgba(2,8,23,0.45);
-  --note-pad: #fffdf2;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-body{
-  font-family:Inter, "Segoe UI", Roboto, system-ui, -apple-system, Arial;
-  background: linear-gradient(180deg,#081a2a,#071424 60%);
-  color:#111827; -webkit-font-smoothing:antialiased;
-  min-height:100vh; overflow:hidden;
-}
+  /* ===== RESET & BASE ===== */
+  :root{
+    --bg1:#081226;
+    --paper1:#fbf3e6;
+    --paper2:#f0e4cf;
+    --wood-a:#5b2f2d;
+    --wood-b:#7a3d39;
+    --seal-red1:#e63b3b;
+    --accent1:#667eea;
+    --accent2:#764ba2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:Inter, "Segoe UI", Roboto, system-ui, -apple-system, Arial;
+    background: linear-gradient(180deg,var(--bg1),#061023 60%);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    color:#0f1724; min-height:100vh; overflow:hidden;
+  }
+  #app{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
 
-/* APP LAYOUT */
-#app{ position:relative; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:26px; }
+  /* ===== PERGAMINHO VERTICAL (Jiraiya-inspired) =====
+     Timeline total: ~10s. Fall + unroll + seal + title + fade */
+  #scroll-animation{
+    position:fixed; inset:0; display:flex; align-items:flex-start; justify-content:center;
+    z-index:9999; pointer-events:none; background: radial-gradient(circle at 50% 6%, rgba(255,255,255,0.02), transparent 10%);
+  }
+  .scroll-wrapper{
+    width:520px; max-width:90vw; display:flex; flex-direction:column; align-items:center;
+    transform-origin: top center;
+    animation:scrollFall 1.7s cubic-bezier(.22,.9,.35,1) forwards;
+  }
+  @keyframes scrollFall{
+    0%{transform:translateY(-180vh) rotate(-6deg); opacity:0}
+    60%{transform:translateY(-6vh) rotate(-1deg); opacity:1}
+    88%{transform:translateY(0) rotate(0)}
+    100%{transform:translateY(0)}
+  }
 
-/* --- INTRO (PERGAMINHO) --- */
-#scroll-animation{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:9999; pointer-events:none; background: radial-gradient(circle at 50% 10%, rgba(255,255,255,0.02), transparent 10%); }
-.scroll-wrapper{ width:560px; max-width:88vw; position:relative; display:flex; flex-direction:column; align-items:center; transform-origin:center top; animation:fallIn 1.8s cubic-bezier(.22,.9,.35,1) forwards;}
-@keyframes fallIn{0%{transform:translateY(-160vh) rotate(-18deg); opacity:0} 55%{transform:translateY(-6vh) rotate(-3deg); opacity:1} 72%{transform:translateY(0) rotate(0deg)} 100%{transform:translateY(0) rotate(0deg)}}
-.wood-roll{ width:100%; height:64px; border-radius:36px; background: linear-gradient(90deg,#4e2f2a,#6b4a3f,#8b6b60,#6b4a3f,#4e2f2a); box-shadow:0 10px 30px rgba(0,0,0,0.45), inset 0 3px 8px rgba(255,255,255,0.12); position:relative; z-index:3 }
-.scroll-paper{ width:100%; height:0; background: linear-gradient(135deg,var(--paper1), #efe0c8 60%); box-shadow: inset 0 0 40px rgba(0,0,0,0.08), 0 10px 30px rgba(0,0,0,0.35); overflow:hidden; position:relative; z-index:2; border-left:6px solid rgba(139,115,85,0.18); border-right:6px solid rgba(139,115,85,0.18); animation:unroll 4.6s cubic-bezier(.2,.9,.25,1) 1s forwards; }
-@keyframes unroll{0%{height:0} 60%{height:340px} 100%{height:420px}}
-.scroll-paper::before{ content:""; position:absolute; inset:0; background-image: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(139,115,85,0.02) 3px, rgba(139,115,85,0.02) 6px), repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(139,115,85,0.02) 3px, rgba(139,115,85,0.02) 6px); pointer-events:none; mix-blend-mode:multiply; }
-.scroll-content{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; transform:translateY(10px); animation:contentIn 1s ease 5.0s forwards;}
-@keyframes contentIn{0%{opacity:0; transform:translateY(24px)} 100%{opacity:1; transform:translateY(0)}}
-.seal{ width:120px;height:120px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 25%, #ff6b6b,#c62828 60%, #8b1515 100%); box-shadow:0 8px 30px rgba(0,0,0,0.4), inset 0 3px 8px rgba(255,255,255,0.18); transform:scale(0.0) rotate(0); opacity:0; animation:sealPop .7s cubic-bezier(.2,.95,.2,1.05) 4.6s forwards, sealRotate 9s linear 5.4s infinite; }
-@keyframes sealPop{0%{transform:scale(0); opacity:0} 60%{transform:scale(1.25); opacity:1} 100%{transform:scale(1)}}
-@keyframes sealRotate{0%{transform:scale(1) rotate(0deg)} 100%{transform:scale(1) rotate(360deg)}}
-.kanji{ font-size:64px;color:#fdeedc;font-weight:800; text-shadow:2px 2px 6px rgba(0,0,0,0.45) }
-.scroll-title{ margin-top:18px; font-family:'Courier New', monospace; font-size:42px; font-weight:800; letter-spacing:4px; color:#24120b; opacity:0; transform:translateY(8px); animation:titleIn .9s ease 5.2s forwards; text-shadow:0 6px 18px rgba(255,215,0,0.08) }
-@keyframes titleIn{ to{opacity:1; transform:translateY(0)} }
-#scroll-animation.fadeout{ animation:scrollFade 1.0s ease 6.6s forwards; }
-@keyframes scrollFade{0%{opacity:1}100%{opacity:0; visibility:hidden}}
+  .wood-roll.top{
+    width:96%; height:62px; border-radius:36px;
+    background: linear-gradient(90deg,var(--wood-a),var(--wood-b),#a0665d);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5), inset 0 3px 10px rgba(255,255,255,0.08);
+    z-index:6; position:relative;
+  }
 
-/* --- LOGIN --- */
-#login-screen{ position:relative; z-index:50; width:100%; max-width:520px; opacity:0; transform:translateY(12px) scale(.99); transition:all .55s ease; margin-top:24px; }
-#login-screen.visible{ opacity:1; transform:translateY(0) scale(1) }
-.login-card{ background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,250,0.95)); border-radius:22px; padding:20px; box-shadow:var(--card-shadow); display:flex; flex-direction:column; gap:10px; }
-.login-title{ text-align:center; font-size:24px; font-weight:800; display:flex; gap:8px; align-items:center; justify-content:center }
-.login-sub{ text-align:center; color:#56616b; font-size:13px }
-.field{ display:flex; flex-direction:column; gap:6px; margin-top:6px }
-label{ font-size:13px; font-weight:700; color:#23303b }
-input[type="password"]{ padding:12px;border-radius:10px;border:2px solid #e6e6e6; font-size:15px; outline:none; transition:all .18s ease; }
-input[type="password"]:focus{ border-color:#6e8de8; box-shadow:0 6px 18px rgba(102,126,234,0.12) }
-.btn{ margin-top:6px;padding:12px;border-radius:12px;border:none;cursor:pointer; background:linear-gradient(135deg,var(--accent1),var(--accent2)); color:#fff; font-weight:800; font-size:16px; box-shadow:0 10px 30px rgba(102,126,234,0.18); }
-.hint{ text-align:center; color:#8a97a6; font-size:13px; margin-top:6px }
-.error{ background:#fee;padding:10px;border-radius:10px;border-left:4px solid #c33;color:#8a1b1b; display:none; }
+  .scroll-paper{
+    width:100%; height:0; overflow:hidden; position:relative; z-index:5;
+    background: linear-gradient(180deg,var(--paper1),var(--paper2));
+    border-left:8px solid rgba(139,115,85,0.14);
+    border-right:8px solid rgba(139,115,85,0.14);
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.06), 0 10px 30px rgba(0,0,0,0.24);
+    animation:unrollVert 5.0s cubic-bezier(.18,.9,.28,1) 0.9s forwards;
+  }
 
-/* --- NOTES APP --- */
-#notes-app{ display:none; position:relative; z-index:40; width:100%; max-width:1100px; margin:18px auto 36px; }
-#notes-app.active{ display:block; }
+  @keyframes unrollVert{
+    0%{height:0}
+    60%{height:380px}   /* partial reveal */
+    100%{height:520px}  /* open enough for content */
+  }
 
-.topbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px; }
-.brand{ display:flex; align-items:center; gap:12px; }
-.logo{ width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent1),var(--accent2)); color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:var(--card-shadow) }
-.brand h2{ font-size:18px; font-weight:800 }
-.controls{ display:flex; gap:10px; align-items:center; }
+  /* paper subtle grid / runes background to hint texture */
+  .scroll-paper::before{
+    content:""; position:absolute; inset:0;
+    background-image:
+      linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(0,0,0,0.02) 1px, transparent 1px);
+    background-size: 18px 18px, 18px 18px;
+    opacity:0.12; pointer-events:none;
+  }
 
-.search{ padding:10px 12px;border-radius:12px;border:2px solid #e6e6e6; width:220px; outline:none }
-.create-note{ padding:10px 14px;border-radius:12px;border:2px dashed rgba(0,0,0,0.06); background:linear-gradient(180deg,#fff,#fbfbfb); display:flex; gap:10px; align-items:center; cursor:pointer; min-width:220px }
+  /* runic ring & seal container centered vertically in the paper */
+  .scroll-inner{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none;
+    opacity:0; transform:translateY(10px); animation:innerReveal 1s ease 4.6s forwards;
+  }
+  @keyframes innerReveal{ to{opacity:1; transform:translateY(0)} }
 
-.actions-row{ display:flex; gap:8px; align-items:center }
+  /* Runes ring — we create an SVG circle of faux runes (decorative) */
+  .runes-svg{ width:260px; height:260px; transform-origin:center center; animation:runesPulse 1.2s ease 4.9s forwards; }
+  @keyframes runesPulse{ 0%{transform:scale(.8)} 70%{transform:scale(1.05)} 100%{transform:scale(1)} }
 
-/* GRID */
-.grid{ display:grid; grid-template-columns: repeat(auto-fill,minmax(230px,1fr)); gap:16px; }
+  /* SEAL (red circular) */
+  .seal{
+    position:absolute; width:140px; height:140px; border-radius:999px; z-index:8;
+    display:flex;align-items:center;justify-content:center; pointer-events:none;
+    background: radial-gradient(circle at 30% 25%, #ff6b6b, #c62828 60%, #8b1515 100%);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.45), inset 0 3px 10px rgba(255,255,255,0.12);
+    opacity:0; transform:scale(0) rotate(0); animation:sealPop .65s cubic-bezier(.2,.95,.2,1.05) 5.3s forwards, sealSpin 9s linear 5.9s infinite;
+  }
+  @keyframes sealPop{ 0%{transform:scale(0); opacity:0} 60%{transform:scale(1.25); opacity:1} 100%{transform:scale(1)} }
+  @keyframes sealSpin{ 0%{transform:scale(1) rotate(0deg)} 100%{transform:scale(1) rotate(360deg)} }
+  .seal .kanji{ color:#fdeedc; font-weight:800; font-size:44px; text-shadow:1px 1px 4px rgba(0,0,0,0.4) }
 
-/* CARD */
-.note{ background:#fff; border-radius:12px; padding:12px; min-height:120px; position:relative; box-shadow:0 8px 30px rgba(2,8,23,.08); display:flex; flex-direction:column; gap:8px; }
-.note .title{ font-weight:800; font-size:15px; outline:none }
-.note .content{ font-size:14px; color:#1f2937; flex:1; outline:none; white-space:pre-wrap; overflow:auto; }
-.note-footer{ display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:8px }
-.note-actions{ display:flex; gap:8px; align-items:center }
+  /* X em estilo brush: SVG com traços largos */
+  .x-svg{ width:110px; height:110px; position:relative; z-index:9; opacity:0; transform:translateY(8px) scale(.95);
+    animation:xIn 0.8s ease 5.6s forwards;
+  }
+  @keyframes xIn{ to{opacity:1; transform:translateY(0) scale(1)} }
 
-/* colors */
-.clr-0{ background:#fff }
-.clr-1{ background:#fff7c0 }
-.clr-2{ background:#ffd6b6 }
-.clr-3{ background:#fddaf6 }
-.clr-4{ background:#d7facc }
+  /* FADE OUT whole scroll to reveal login: triggers ~7s -> finish ~8s to give 10s feel */
+  #scroll-animation.fadeout{ animation:scrollFade 1s ease 6.8s forwards; }
+  @keyframes scrollFade{ 0%{opacity:1} 100%{opacity:0; visibility:hidden} }
 
-/* small screen tweaks */
-@media (max-width:680px){
-  .scroll-wrapper{ width:92vw }
-  .controls .search{ width:120px }
-  .brand h2{ display:none }
-}
+  /* bottom wood roll */
+  .wood-roll.bottom{
+    width:96%; height:62px; border-radius:36px; margin-top:6px;
+    background: linear-gradient(90deg,#4b2725,#6a3c39,#8b5f58);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4), inset 0 -3px 10px rgba(255,255,255,0.06);
+  }
+
+  /* ===== LOGIN CARD ===== */
+  #login-screen{ position:relative; z-index:60; width:100%; max-width:600px; opacity:0; transform:translateY(12px) scale(.99); transition:all .45s ease; margin-top:18px; display:flex; justify-content:center }
+  #login-screen.visible{ opacity:1; transform:translateY(0) scale(1) }
+  .login-card{ background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,250,0.98)); border-radius:18px; padding:18px; width:96%; max-width:520px; box-shadow: 0 22px 60px rgba(2,8,23,0.45); }
+  .login-title{ font-size:22px; font-weight:800; text-align:center; margin-bottom:6px }
+  .login-sub{ text-align:center; color:#546273; font-size:13px; margin-bottom:8px }
+
+  .field{ display:flex; flex-direction:column; gap:6px }
+  label{ font-size:13px; font-weight:700; color:#24323f }
+  input[type="password"]{ padding:12px;border-radius:10px;border:2px solid #e6e6e6; font-size:15px; outline:none }
+  input[type="password"]:focus{ border-color:#6e8de8; box-shadow:0 6px 18px rgba(102,126,234,0.12) }
+  .btn{ margin-top:8px;padding:12px;border-radius:12px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--accent1),var(--accent2)); color:#fff; font-weight:800; font-size:15px }
+
+  .error{ display:none; background:#fee;padding:10px;border-left:4px solid #c33;color:#8a1b1b;border-radius:8px; margin-top:8px; text-align:center }
+
+  /* ===== NOTES APP (Keep-like) ===== */
+  #notes-app{ display:none; position:relative; z-index:50; width:100%; max-width:1120px; margin:20px auto; }
+  #notes-app.active{ display:block }
+
+  .topbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px }
+  .brand{ display:flex; align-items:center; gap:12px }
+  .logo{ width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent1),var(--accent2)); color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:20px; box-shadow: 0 10px 30px rgba(2,8,23,0.12) }
+  .brand h2{ font-size:18px; font-weight:800 }
+
+  .controls{ display:flex; gap:10px; align-items:center }
+
+  .search{ padding:10px 12px;border-radius:12px;border:2px solid #e6e6e6; width:240px; outline:none }
+  .create-note{ padding:10px 14px;border-radius:12px;border:2px dashed rgba(0,0,0,0.06); background:linear-gradient(180deg,#fff,#fbfbfb); display:flex; gap:10px; align-items:center; cursor:pointer; min-width:220px }
+
+  .grid{ display:grid; grid-template-columns: repeat(auto-fill,minmax(240px,1fr)); gap:16px }
+
+  .note{ background:#fff;border-radius:12px;padding:12px;min-height:110px;display:flex;flex-direction:column;gap:8px; box-shadow:0 8px 30px rgba(2,8,23,0.06) }
+  .title{ font-weight:800; font-size:15px; outline:none }
+  .content{ font-size:14px; color:#1f2937; flex:1; outline:none; white-space:pre-wrap; overflow:auto }
+
+  .note-footer{ display:flex; justify-content:space-between; align-items:center; gap:8px }
+  .note-actions{ display:flex; gap:8px; align-items:center }
+
+  .clr-0{ background:#fff }
+  .clr-1{ background:#fff7c0 }
+  .clr-2{ background:#ffd6b6 }
+  .clr-3{ background:#fddaf6 }
+  .clr-4{ background:#d7facc }
+
+  @media (max-width:680px){
+    .scroll-wrapper{ width:92vw }
+    .search{ width:120px }
+    .brand h2{ display:none }
+  }
 </style>
 </head>
 <body>
   <div id="app">
-    <!-- PERGAMINHO -->
+    <!-- PERGAMINHO VERTICAL -->
     <div id="scroll-animation" aria-hidden="true">
-      <div class="scroll-wrapper" role="img" aria-label="Pergaminho de abertura">
-        <div class="wood-roll top" style="transform:translateY(8px)"></div>
+      <div class="scroll-wrapper" role="img" aria-label="Pergaminho de abertura vertical estilo Jiraiya">
+        <div class="wood-roll top" aria-hidden="true"></div>
+
         <div class="scroll-paper" aria-hidden="true">
-          <div class="scroll-content">
-            <div class="seal"><div class="kanji">封</div></div>
-            <div class="scroll-title">MEU UNIVERSO X</div>
+          <div class="scroll-inner" aria-hidden="true">
+            <!-- Runes ring - decorative SVG -->
+            <svg class="runes-svg" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <path id="glyph" d="M1 0c2 3 6 3 9 0" />
+              </defs>
+              <g transform="translate(130,130)">
+                <!-- many small rotated glyphs to simulate runes -->
+                <!-- we'll draw 32 glyphs on circle -->
+                <g id="runes">
+                  <!-- generate visually by hand-placed glyphs -->
+                  <!-- these are simple decorative strokes -->
+                  <g fill="#111" transform="translate(-6,-6) scale(1.2)">
+                    <path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/>
+                  </g>
+                </g>
+                <!-- repeated copies around circle -->
+                <g id="ring">
+                  <!-- we draw using JS-like duplication via multiple path elements manually rotated -->
+                  <!-- simplified decorative ring made of small strokes -->
+                  <g>
+                    <!-- generate 24 strokes -->
+                    <!-- using inline paths rotated -->
+                    <!-- to keep code compact, we'll place them on circle -->
+                    <!-- rotation increments 15deg -->
+                    <g transform="rotate(0) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(15) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(30) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(45) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(60) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(75) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(90) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(105) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(120) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(135) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(150) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(165) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+
+                    <g transform="rotate(180) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(195) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(210) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(225) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(240) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(255) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(270) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(285) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(300) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(315) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(330) translate(0,-100)"><path d="M0 0c3 5 9 5 13 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                    <g transform="rotate(345) translate(0,-100)"><path d="M0 0c2 4 8 4 11 0" stroke="#0b0b0b" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+                  </g>
+                </g>
+                <!-- subtle circle -->
+                <circle r="78" fill="none" stroke="rgba(12,12,12,0.06)" stroke-width="8"/>
+              </g>
+            </svg>
+
+            <!-- seal -->
+            <div class="seal" aria-hidden="true"><div class="kanji">封</div></div>
+
+            <!-- X brush style using SVG thick strokes -->
+            <svg class="x-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <g stroke="#0b0b0b" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-width="10">
+                <path d="M20 20 L80 80" stroke-width="12" stroke-linecap="round"/>
+                <path d="M80 20 L20 80" stroke-width="12" stroke-linecap="round"/>
+              </g>
+            </svg>
           </div>
         </div>
-        <div class="wood-roll bottom" style="transform:translateY(-8px)"></div>
+
+        <div class="wood-roll bottom" aria-hidden="true"></div>
       </div>
     </div>
 
@@ -118,12 +256,13 @@ input[type="password"]:focus{ border-color:#6e8de8; box-shadow:0 6px 18px rgba(1
         <div class="login-title" id="login-title">🔐 Acesso Seguro — Meu Universo X</div>
         <div class="login-sub">Digite a senha para abrir o aplicativo</div>
         <div id="login-error" class="error">Senha incorreta</div>
+
         <div class="field">
           <label for="password">Senha</label>
-          <input id="password" type="password" inputmode="text" autocomplete="off" placeholder="•••••••" />
+          <input id="password" type="password" autocomplete="off" placeholder="••••••" />
         </div>
         <button id="login-btn" class="btn">Entrar</button>
-        <div class="hint">Dica: senha padrão no código. Muda quando quiser.</div>
+        <div style="margin-top:6px; text-align:center; color:#76808a; font-size:13px">Dica: senha padrão no código (podes alterar)</div>
       </div>
     </div>
 
@@ -141,36 +280,17 @@ input[type="password"]:focus{ border-color:#6e8de8; box-shadow:0 6px 18px rgba(1
         <div class="controls">
           <input id="search" class="search" placeholder="Pesquisar notas..." />
           <div id="create" class="create-note" title="Criar nova nota">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="opacity:.9">
-              <path d="M12 5v14M5 12h14" stroke="#374151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#374151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <div style="font-weight:700;color:#374151">Nova nota</div>
           </div>
-
-          <!-- export / import / drive -->
-          <div class="actions-row" style="margin-left:6px">
+          <div style="display:flex;gap:8px;align-items:center">
             <button id="exportAllBtn" class="btn" title="Exportar todas as notas (JSON)">Exportar JSON</button>
-            <label style="display:inline-block;margin-left:6px">
-              <input id="importFile" type="file" accept="application/json" style="display:none"/>
-              <button class="btn" onclick="document.getElementById('importFile').click()" title="Importar JSON">Importar JSON</button>
-            </label>
+            <label><input id="importFile" type="file" accept="application/json" style="display:none"/><button class="btn" onclick="document.getElementById('importFile').click()">Importar JSON</button></label>
+            <input id="driveToken" placeholder="Token Drive (opcional)" style="min-width:220px;padding:8px;border-radius:8px;border:1px solid #e6e6e6"/>
+            <button id="uploadDriveBtn" class="btn">Upload Drive</button>
+            <button id="downloadAllBtn" class="btn" style="background:linear-gradient(135deg,#22c1c3,#2e9fff)">Download JSON</button>
           </div>
         </div>
-      </div>
-
-      <!-- drive quick uploader (opcional token) -->
-      <div style="margin-bottom:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:1100px">
-        <div style="background:#fff;padding:10px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.06);font-size:13px;color:#334155">
-          <strong>Guardar no Google Drive:</strong>
-          <div style="max-width:820px; font-size:13px; color:#6b7280; margin-top:6px">
-            Para upload direto: cole um <strong>Access Token</strong> (OAuth2) gerado por ti no campo, depois clica em "Upload JSON para Drive".
-            <br><small>Se não souberes como obter um token, exporta o JSON e carrega manualmente no Google Drive — é mais seguro.</small>
-          </div>
-        </div>
-
-        <input id="driveToken" placeholder="Cole aqui o Access Token (opcional)" style="min-width:320px;padding:10px;border-radius:10px;border:1px solid #e6e6e6" />
-        <button id="uploadDriveBtn" class="btn">Upload JSON para Drive</button>
-        <button id="downloadAllBtn" class="btn" style="background:linear-gradient(135deg,#22c1c3,#2e9fff)">Download JSON</button>
       </div>
 
       <section id="notes-grid" class="grid" aria-label="Notas"></section>
@@ -179,17 +299,18 @@ input[type="password"]:focus{ border-color:#6e8de8; box-shadow:0 6px 18px rgba(1
   </div>
 
 <script>
-/* ================= CONFIG ================= */
-const PASSWORD = 'meuuniversox'; // altera aqui se quiseres
+/* ================== CONFIG ================== */
+const PASSWORD = 'meuuniversox';
 const STORAGE_KEY = 'meuuniversox_notes_v1';
 const COLORS = ['clr-0','clr-1','clr-2','clr-3','clr-4'];
 
-/* ===== ELEMENTS ===== */
+/* ===== Elements ===== */
 const scrollAnim = document.getElementById('scroll-animation');
 const loginScreen = document.getElementById('login-screen');
 const loginBtn = document.getElementById('login-btn');
 const passwordInput = document.getElementById('password');
 const loginError = document.getElementById('login-error');
+
 const notesApp = document.getElementById('notes-app');
 const createBtn = document.getElementById('create');
 const notesGrid = document.getElementById('notes-grid');
@@ -202,16 +323,15 @@ const uploadDriveBtn = document.getElementById('uploadDriveBtn');
 
 let NOTES = [];
 
-/* ========== INTRO TIMING ========== */
-/* start fadeout of scroll so intro feels ~10s in total */
+/* ===== Intro timing (approx 10s feel) ===== */
 setTimeout(()=> {
   scrollAnim.classList.add('fadeout');
   setTimeout(()=> loginScreen.classList.add('visible'), 700);
 }, 6200);
 setTimeout(()=> passwordInput.focus(), 7000);
 
-/* ===== LOGIN ===== */
-function showError(msg){ loginError.textContent = msg || 'Senha incorreta'; loginError.style.display = 'block'; setTimeout(()=> loginError.style.display = 'none', 2000); }
+/* ===== Login logic ===== */
+function showError(msg){ loginError.textContent = msg || 'Senha incorreta'; loginError.style.display = 'block'; setTimeout(()=> loginError.style.display = 'none', 2200); }
 loginBtn.addEventListener('click', tryLogin);
 passwordInput.addEventListener('keydown', (e)=> { if(e.key === 'Enter') tryLogin(); });
 
@@ -223,28 +343,23 @@ function tryLogin(){
     loginScreen.style.transform = 'translateY(8px) scale(.98)';
     setTimeout(()=> { loginScreen.style.display = 'none'; openNotesApp(); }, 450);
   } else {
-    showError('Senha incorreta');
-    passwordInput.value = ''; passwordInput.focus();
+    showError('Senha incorreta'); passwordInput.value = ''; passwordInput.focus();
   }
 }
 
-/* ===== NOTES STORE ===== */
-function loadNotes(){
-  try{ const raw = localStorage.getItem(STORAGE_KEY); NOTES = raw ? JSON.parse(raw) : []; } catch(e){ NOTES = [] }
-}
+/* ===== Notes store ===== */
+function loadNotes(){ try{ const raw = localStorage.getItem(STORAGE_KEY); NOTES = raw ? JSON.parse(raw) : []; }catch(e){ NOTES = []; } }
 function saveNotes(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(NOTES)); }
 
-/* create new note */
-function createNote(initial = {title:'', content:'', color:COLORS[0]}){
-  const note = { id: 'n_' + Date.now() + '_' + Math.floor(Math.random()*9999), title: initial.title || '', content: initial.content || '', color: initial.color || COLORS[0], updated: Date.now() };
-  NOTES.unshift(note);
-  saveNotes();
-  renderNotes();
+/* create note */
+function createNote(initial={title:'',content:'',color:COLORS[0]}) {
+  const note = { id:'n_'+Date.now()+'_'+Math.floor(Math.random()*9999), title:initial.title||'', content:initial.content||'', color:initial.color||COLORS[0], updated:Date.now() };
+  NOTES.unshift(note); saveNotes(); renderNotes();
   setTimeout(()=> { const el = document.querySelector(`[data-id="${note.id}"]`); if(el){ el.querySelector('.title').focus(); placeCaretAtEnd(el.querySelector('.title')); } }, 120);
 }
 
 /* render notes */
-function renderNotes(filter=''){
+function renderNotes(filter='') {
   notesGrid.innerHTML = '';
   const q = (filter||'').toLowerCase().trim();
   NOTES.forEach(note => {
@@ -253,25 +368,21 @@ function renderNotes(filter=''){
     card.className = 'note ' + note.color;
     card.dataset.id = note.id;
     card.innerHTML = `
-      <div contenteditable="true" class="title" aria-label="Título">${escapeHtml(note.title)}</div>
-      <div contenteditable="true" class="content" aria-label="Conteúdo">${escapeHtml(note.content)}</div>
+      <div contenteditable="true" class="title">${escapeHtml(note.title)}</div>
+      <div contenteditable="true" class="content">${escapeHtml(note.content)}</div>
       <div class="note-footer">
         <div style="font-size:12px;color:#6b7280">Atualizada ${timeAgo(note.updated)}</div>
         <div class="note-actions">
-          <select class="color-select" title="Cor">
+          <select class="color-select">
             <option value="clr-0">Branco</option>
             <option value="clr-1">Amarelo</option>
             <option value="clr-2">Laranja</option>
             <option value="clr-3">Rosa</option>
             <option value="clr-4">Verde</option>
           </select>
-          <button class="icon-btn btn-share-email" title="Partilhar por Email" aria-label="Partilhar por Email">
-            ✉️
-          </button>
-          <button class="icon-btn btn-share-ws" title="Partilhar por WhatsApp" aria-label="Partilhar por WhatsApp">
-            💬
-          </button>
-          <button class="icon-btn btn-download-txt" title="Descarregar nota" aria-label="Descarregar nota">⬇️</button>
+          <button class="icon-btn btn-share-email" title="Partilhar por Email">✉️</button>
+          <button class="icon-btn btn-share-ws" title="Partilhar por WhatsApp">💬</button>
+          <button class="icon-btn btn-download-txt" title="Descarregar nota">⬇️</button>
           <button class="icon-btn btn-export-json" title="Exportar nota (JSON)">📤</button>
           <button class="icon-btn btn-delete" title="Excluir">🗑️</button>
         </div>
@@ -281,50 +392,37 @@ function renderNotes(filter=''){
     select.value = note.color;
     const titleEl = card.querySelector('.title');
     const contentEl = card.querySelector('.content');
-    const deleteBtn = card.querySelector('.btn-delete');
-    const emailBtn = card.querySelector('.btn-share-email');
-    const wsBtn = card.querySelector('.btn-share-ws');
-    const dlBtn = card.querySelector('.btn-download-txt');
-    const exportJsonBtn = card.querySelector('.btn-export-json');
 
     titleEl.addEventListener('input', ()=> debounceSave(note.id, titleEl, contentEl, select));
     contentEl.addEventListener('input', ()=> debounceSave(note.id, titleEl, contentEl, select));
     select.addEventListener('change', ()=> { note.color = select.value; note.updated = Date.now(); saveNotes(); renderNotes(searchInput.value); });
 
-    deleteBtn.addEventListener('click', ()=> { if(confirm('Excluir nota?')){ NOTES = NOTES.filter(n=>n.id !== note.id); saveNotes(); renderNotes(searchInput.value); }});
+    card.querySelector('.btn-delete').addEventListener('click', ()=> { if(confirm('Excluir nota?')){ NOTES = NOTES.filter(n=>n.id !== note.id); saveNotes(); renderNotes(searchInput.value); }});
 
-    emailBtn.addEventListener('click', ()=> {
+    card.querySelector('.btn-share-email').addEventListener('click', ()=> {
       const subject = encodeURIComponent(note.title || 'Nota - Meu Universo X');
       const body = encodeURIComponent((note.title? note.title + '\n\n':'') + note.content);
-      // mailto with body (may be long)
-      const url = `mailto:?subject=${subject}&body=${body}`;
-      window.location.href = url;
+      window.location.href = `mailto:?subject=${subject}&body=${body}`;
     });
 
-    wsBtn.addEventListener('click', ()=> {
+    card.querySelector('.btn-share-ws').addEventListener('click', ()=> {
       const text = encodeURIComponent((note.title? note.title + '\n\n':'') + note.content);
-      // Prefer web WhatsApp; on mobile whatsapp://send?text=...
       const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
       const waUrl = mobile ? `whatsapp://send?text=${text}` : `https://web.whatsapp.com/send?text=${text}`;
       window.open(waUrl, '_blank');
     });
 
-    dlBtn.addEventListener('click', ()=> {
+    card.querySelector('.btn-download-txt').addEventListener('click', ()=> {
       const blob = new Blob([ (note.title? note.title + '\n\n' : '') + note.content ], { type: 'text/plain;charset=utf-8' });
-      const name = (note.title || 'nota') .replace(/[^\w\s\-]/gi,'').slice(0,40) || 'nota';
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `${name}.txt`;
-      document.body.appendChild(a); a.click(); a.remove();
+      const name = (note.title || 'nota').replace(/[^\w\s\-]/gi,'').slice(0,40) || 'nota';
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${name}.txt`; document.body.appendChild(a); a.click(); a.remove();
       setTimeout(()=> URL.revokeObjectURL(a.href), 5000);
     });
 
-    exportJsonBtn.addEventListener('click', ()=> {
+    card.querySelector('.btn-export-json').addEventListener('click', ()=> {
       const data = JSON.stringify([note], null, 2);
       const blob = new Blob([data], { type: 'application/json' });
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-      a.download = `${(note.title||'nota').replace(/[^\w\s\-]/gi,'').slice(0,40)}.json`;
-      document.body.appendChild(a); a.click(); a.remove();
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${(note.title||'nota').replace(/[^\w\s\-]/gi,'').slice(0,40)}.json`; document.body.appendChild(a); a.click(); a.remove();
       setTimeout(()=> URL.revokeObjectURL(a.href), 5000);
     });
 
@@ -334,7 +432,9 @@ function renderNotes(filter=''){
 
 /* helpers */
 function escapeHtml(str){ if(!str) return ''; return str.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-function unescapeHtml(str){ if(!str) return ''; return str.replaceAll('&amp;','&').replaceAll('&lt;','<').replaceAll('&gt;','>'); }
+function timeAgo(ts){ const s = Math.floor((Date.now()-ts)/1000); if(s<60) return `${s}s`; if(s<3600) return `${Math.floor(s/60)}m`; if(s<86400) return `${Math.floor(s/3600)}h`; return `${Math.floor(s/86400)}d`; }
+function placeCaretAtEnd(el){ el.focus(); if(window.getSelection && document.createRange){ const range=document.createRange(); range.selectNodeContents(el); range.collapse(false); const sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(range); } }
+
 let saveTimeouts = {};
 function debounceSave(id, titleEl, contentEl, select){
   clearTimeout(saveTimeouts[id]);
@@ -348,53 +448,33 @@ function debounceSave(id, titleEl, contentEl, select){
       saveNotes();
       renderNotes(searchInput.value);
     }
-  }, 480);
+  }, 500);
 }
 
-/* initial demo */
-function ensureNotes(){ if(NOTES.length === 0){ createNote({title:'Bem-vindo ao Meu Universo X', content:'Escreve aqui. Usa os botões para partilhar, descarregar e exportar.', color:COLORS[0]}); } }
+/* create / load / save */
+function loadNotes(){ try{ const raw = localStorage.getItem(STORAGE_KEY); NOTES = raw ? JSON.parse(raw) : []; }catch(e){ NOTES = []; } }
+function saveNotes(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(NOTES)); }
+function ensureNotes(){ if(NOTES.length === 0) createNote({title:'Bem-vindo ao Meu Universo X', content:'As tuas notas ficam guardadas localmente. Usa os botões para partilhar e exportar.', color:COLORS[0]}); }
 
-/* time helper */
-function timeAgo(ts){ const s = Math.floor((Date.now() - ts)/1000); if(s < 60) return `${s}s`; if(s < 3600) return `${Math.floor(s/60)}m`; if(s < 86400) return `${Math.floor(s/3600)}h`; return `${Math.floor(s/86400)}d`; }
+/* open notes app */
+function openNotesApp(){ loadNotes(); ensureNotes(); renderNotes(); notesApp.classList.add('active'); document.body.style.overflow='auto'; notesApp.style.opacity='0'; notesApp.style.transform='translateY(8px)'; setTimeout(()=>{ notesApp.style.transition='all .48s ease'; notesApp.style.opacity='1'; notesApp.style.transform='translateY(0)'; }, 60); }
 
-function placeCaretAtEnd(el) { el.focus(); if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") { const range = document.createRange(); range.selectNodeContents(el); range.collapse(false); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); } }
-
-/* open app after login */
-function openNotesApp(){
-  loadNotes();
-  ensureNotes();
-  renderNotes();
-  notesApp.classList.add('active');
-  document.body.style.overflow = 'auto';
-  notesApp.style.opacity = '0';
-  notesApp.style.transform = 'translateY(8px)';
-  setTimeout(()=> { notesApp.style.transition = 'all .48s ease'; notesApp.style.opacity = '1'; notesApp.style.transform = 'translateY(0)'; }, 60);
-}
-
-/* create button */
+/* interactions */
 createBtn.addEventListener('click', ()=> createNote({title:'', content:'', color:COLORS[0]}));
-
-/* search */
 searchInput.addEventListener('input', ()=> renderNotes(searchInput.value));
+document.addEventListener('keydown', (e)=> { if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='n'){ e.preventDefault(); createNote({title:'',content:'',color:COLORS[0]}); } });
 
-/* keyboard shortcut */
-document.addEventListener('keydown', (e)=> { if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n'){ e.preventDefault(); createNote({title:'',content:'',color:COLORS[0]}); } });
-
-/* export all JSON (download) */
+/* export/import/download all */
 exportAllBtn.addEventListener('click', ()=> {
   loadNotes();
   const data = JSON.stringify(NOTES, null, 2);
   const blob = new Blob([data], { type: 'application/json' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = `meuuniversox_notas_${new Date().toISOString().slice(0,10)}.json`;
-  document.body.appendChild(a); a.click(); a.remove();
+  a.download = `meuuniversox_notas_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=> URL.revokeObjectURL(a.href), 5000);
 });
-
-/* download all (same as export) */
 downloadAllBtn.addEventListener('click', ()=> exportAllBtn.click());
 
-/* import JSON */
 importFile.addEventListener('change', (ev)=>{
   const file = ev.target.files && ev.target.files[0];
   if(!file) return;
@@ -403,88 +483,43 @@ importFile.addEventListener('change', (ev)=>{
     try{
       const parsed = JSON.parse(e.target.result);
       if(!Array.isArray(parsed)) throw new Error('Ficheiro inválido');
-      // merge but avoid duplicate ids
-      const existingIds = new Set(NOTES.map(n=>n.id));
+      const existing = new Set(NOTES.map(n=>n.id));
       parsed.forEach(p=>{
-        if(!p.id) p.id = 'n_' + Date.now() + '_' + Math.floor(Math.random()*9999);
-        if(existingIds.has(p.id)) p.id = 'n_' + Date.now() + '_' + Math.floor(Math.random()*9999);
+        if(!p.id) p.id='n_'+Date.now()+'_'+Math.floor(Math.random()*9999);
+        if(existing.has(p.id)) p.id='n_'+Date.now()+'_'+Math.floor(Math.random()*9999);
         NOTES.unshift(p);
       });
-      saveNotes();
-      renderNotes();
-      alert('Importação concluída');
-    }catch(err){
-      alert('Falha a importar: ' + err.message);
-    }
+      saveNotes(); renderNotes(); alert('Importação concluída');
+    }catch(err){ alert('Falha a importar: ' + err.message); }
   };
   reader.readAsText(file);
-  // reset input
   ev.target.value = '';
 });
 
-/* =========== Google Drive upload (optional) ===========
-  NOTE: This requires an OAuth2 access token with scope:
-    https://www.googleapis.com/auth/drive.file
-  You can obtain a token via OAuth Playground or your own OAuth client.
-  Security: do NOT paste tokens in public places. If unsure, export JSON and upload manually.
-====================================================== */
+/* Google Drive upload (optional) */
 uploadDriveBtn.addEventListener('click', async ()=>{
-  const token = (driveTokenInput.value || '').trim();
-  if(!token){ alert('Cole o Access Token no campo e tenta novamente, ou exporta o JSON e carrega manualmente no Drive.'); return; }
-  // prepare file
+  const token = (driveTokenInput.value || '').trim(); if(!token){ alert('Cole um Access Token do Drive no campo e tenta novamente, ou exporta JSON e carrega manualmente.'); return; }
   loadNotes();
   const data = JSON.stringify(NOTES, null, 2);
   const metadata = { name: `meuuniversox_notas_${new Date().toISOString().slice(0,10)}.json`, mimeType: 'application/json' };
   try{
-    // multipart upload via Drive API: https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart
-    const boundary = '-------MUX' + Math.random().toString(36).slice(2);
-    const dash = '--';
-    const nl = '\r\n';
+    const boundary = '-------X' + Math.random().toString(36).slice(2);
     let multipart = '';
-    multipart += dash + boundary + nl;
-    multipart += 'Content-Type: application/json; charset=UTF-8' + nl + nl;
-    multipart += JSON.stringify(metadata) + nl;
-    multipart += dash + boundary + nl;
-    multipart += 'Content-Type: application/json' + nl + nl;
-    multipart += data + nl;
-    multipart += dash + boundary + dash + nl;
-
+    multipart += `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n`;
+    multipart += `--${boundary}\r\nContent-Type: application/json\r\n\r\n${data}\r\n`;
+    multipart += `--${boundary}--\r\n`;
     const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'multipart/related; boundary=' + boundary
-      },
+      method:'POST',
+      headers:{ 'Authorization':'Bearer '+token, 'Content-Type':'multipart/related; boundary=' + boundary },
       body: multipart
     });
-    if(!res.ok){
-      const txt = await res.text();
-      throw new Error('Erro upload: ' + res.status + ' — ' + txt.slice(0,200));
-    }
-    const result = await res.json();
-    alert('Upload concluído! Ficheiro criado no Drive: ' + (result.name || result.id));
-  }catch(err){
-    alert('Falha no upload para Drive: ' + err.message + '\nSe não conseguires usar token, exporta JSON e faz upload manual no Drive.');
-  }
+    if(!res.ok){ const txt = await res.text(); throw new Error('Erro upload: '+res.status+' — '+txt.slice(0,200)); }
+    const result = await res.json(); alert('Upload concluído! Drive file: ' + (result.name || result.id));
+  }catch(err){ alert('Falha no upload: ' + err.message + '\nSe não conseguires usar token, exporta JSON e carrega manualmente no Drive.'); }
 });
 
-/* load local stored notes now (so import merges correctly) */
+/* initial load (notes kept in localStorage; login still required) */
 loadNotes();
-
-/* Expose simple API: export single note programmatically */
-function exportSingleNoteById(id){
-  const note = NOTES.find(n=>n.id === id);
-  if(!note) return;
-  const data = JSON.stringify([note], null, 2);
-  const blob = new Blob([data], { type: 'application/json' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = `${(note.title||'nota').replace(/[^\w\s\-]/gi,'').slice(0,40)}.json`;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=> URL.revokeObjectURL(a.href), 5000);
-}
-
-/* Small UX: if user reloads show login again but keep notes in localStorage */
-/* END */
 </script>
 </body>
 </html>
